@@ -1,24 +1,6 @@
-function initx(){
-  YKLiba.Log.setLogLevel(YKLiba.Log.DEBUG())
-  const env2 = getEnv2()
-  YKLiba.Log.debug(env2)
-  values = YKLiba.get_simple_rows_with_env(env2)
-  YKLiba.Log.debug(values)
-  /*
-  get_simple_rows_with_env(env2, maxRange = null)
-  [ssId, sheet] = YKLiba.get_spreadsheet(env2.ssId, env2.sheetName)
-  YKLiba.get
-  */
-}
 
 function initx3(env){
-  // YKLiba.Log.setLogLevel(YKLiba.Log.DEBUG())
-  // const env3 = getEnv3()
-  // YKLiba.Log.debug(env3)
-  // values = YKLiba.get_simple_rows_with_env(env3)
-  let [header, values, dataRange] = setupSpreadsheet(env.ss_id, env.sheet_name);
-  // YKLiba.Log.debug(header)
-  // YKLiba.Log.debug(values)
+  let [header, values, dataRange] = Gssx.setupSpreadsheet(env.ss_id, env.sheet_name);
 
   return  [header, values, dataRange];
 }
