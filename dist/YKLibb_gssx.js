@@ -6,16 +6,12 @@
  * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
  */
 function setupSpreadsheet(spreadsheetId, sheetName){
-  // Logger.log(`setupSpreadsheet spreadsheetId=${spreadsheetId}`);
-  // Logger.log(`setupSpreadsheet sheetName=${sheetName}`);
-
   const [spreadsheet, worksheet] = setupForSpreadsheet(spreadsheetId, sheetName);
-  // Logger.log(`setupSpreadsheet worksheet=${worksheet}`);
-  
+  return setupSpreadsheetX(worksheet);
+}
+function setupSpreadsheetX(worksheet){
   const [values, dataRange] = getValuesFromSheet(worksheet); 
-  // Logger.log(`setupSpreadsheet values=${values}`);
   const header =  values.shift();
-  // Logger.log(`setupSpreadsheet header=${header}`);
 
   return [header, values, dataRange];
 }
@@ -83,11 +79,9 @@ function getValuesFromSheet(worksheet){
 function getOrCreateWorksheet(ss, sheetName) {
   // 指定した名前のシートが存在するか確認
   var sheet = ss.getSheetByName(sheetName);
-  Logger.log(`1 getOrCreateWorksheet sheetName=${sheetName} sheet${sheet}`)
   // シートが存在しない場合、新しいシートを作成
   if (sheet == null) {
     sheet = ss.insertSheet(sheetName);
-    Logger.log(`2 getOrCreateWorksheet sheetName=${sheetName} sheet=${sheet}`);
   }
   return sheet;
 }
@@ -105,7 +99,6 @@ function setupForSpreadsheet(spreadsheetId, sheetName){
 
   // ワークシートを取得 (名前で指定)
   var worksheet = getOrCreateWorksheet(spreadsheet,sheetName);
-  Logger.log(`setupForSpreadsheet spreadsheetId=${spreadsheetId} worksheet=${worksheet}`);
   return [spreadsheet, worksheet]; 
 }
 /**
@@ -268,15 +261,11 @@ function compareByYearReverse(a, b) {
   return 0;
 }
 
-function copyWorksheetContentX() {
-  // コピー先のスプレッドシートIDとワークシート名
-  const destinationSpreadsheetId = PropertiesService.getScriptProperties().getProperty('DESTINATION_SPREADSHEET_ID');
+function copyWorksheetContentX(env) {
   let destinationSpreadsheet = null;
   let destinationWorksheet = null;
-  const infoSpreadsheetId = PropertiesService.getScriptProperties().getPropery('INFO_SPREADSHEET_ID');
-  const infoWorksheetName = PropertiesService.getScriptProperties().getPropery('INFO_WORKSHEET_NAME');
 
-  copyWorksheetContent(destinationSpreadsheetId, infoSpreadsheetId, infoWorksheetName)
+  copyWorksheetContent(env.destinationSpreadsheetId, env.infoSpreadsheetId, env.infoWorksheetName)
 }
 /**
  * ワークシートの内容をコピーする。
@@ -322,21 +311,11 @@ function copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sou
   }
 }
 
-function showWorksheetContentX() {
-  // const infoSpreadsheetId = PropertiesService.getScriptProperties().getPropery('INFO_SPREADSHEET_ID');
-  // コピー先のスプレッドシートIDとワークシート名
-  const destinationSpreadsheetId = PropertiesService.getScriptProperties().getProperty('DESTINATION_SPREADSHEET_ID');
+function showWorksheetContentX(env) {
   let destinationSpreadsheet = null;
   let destinationWorksheet = null;
 
-  const scriptProperties = PropertiesService.getScriptProperties();
-  Logger.log(`typeof scriptProperties = ${typeof scriptProperties}`);
-  Logger.log(`scriptProperties = ${scriptProperties}`);
-
-  const infoSpreadsheetId = scriptProperties.getProperty('INFO_SPREADSHEET_ID');
-  const infoWorksheetName = PropertiesService.getScriptProperties().getProperty('INFO_WORKSHEET_NAME');
-
-  showWorksheetContent(destinationSpreadsheetId, infoSpreadsheetId, infoWorksheetName)
+  showWorksheetContent(env.destinationSpreadsheetId, env.infoSpreadsheetId, env.infoWorksheetName)
 }
 
 function showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
@@ -378,6 +357,7 @@ function showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sou
     Logger.log('ワークシートの内容をコピーしました: ' + ' -> ' + destinationWorksheetName);
   }
 }
+
 function showOneWorksheetContent(count, worksheets, destinationWorksheet, prevNumRows) {
   Logger.log(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
 
@@ -407,5 +387,32 @@ function showOneWorksheetContent(count, worksheets, destinationWorksheet, prevNu
   // table.storeTable(array);
 
   return [prevNumRows, numColumns];
+}
+/**
+ * 指定されたスプレッドシートのすべてのワークシートの名前を取得します。
+ *
+ * @param {string} spreadsheetId 取得したいスプレッドシートのID
+ * @return {string[]} ワークシート名の配列
+ */
+function getAllWorksheetNames(spreadsheetId) {
+  try {
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheets = spreadsheet.getSheets();
+    const sheetNames = sheets.map(sheet => sheet.getName());
+    return sheetNames;
+  } catch (error) {
+    console.error("スプレッドシートの取得に失敗しました:", error);
+    return []; // エラー発生時は空の配列を返します
+  }
+}
+
+/**
+ * 受け取ったデータをJSON形式の文字列に変換します。
+ *
+ * @param {any} data JSONに変換したいデータ
+ * @return {string} JSON形式の文字列
+ */
+function convertToJSON(data) {
+  return JSON.stringify(data, null, 2); // null, 2 はJSONを見やすく整形するための引数です
 }
 
