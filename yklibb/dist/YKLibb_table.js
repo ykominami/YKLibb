@@ -47,8 +47,8 @@ class Table {
         if( (typeof value) === "string" ){
           value = value.trim();
           value = value.replace(/^978-/, "978");
-          Logger.log( `value=${value}` );
-          Logger.log(`typeof value=${typeof value}`);
+          YKLiblog.Log.debug( `value=${value}` );
+          YKLiblog.Log.debug(`typeof value=${typeof value}`);
           this.setColValue(row, 'ISBN', value);
           this.setRow(i, row);
         }
@@ -61,11 +61,11 @@ class Table {
       let value = this.getCol(row, 'ISBN');
       if( (typeof value) === "string" ){
         if( value.length === 15){
-          Logger.log( `0 length=${value.length}` );
+          YKLiblog.Log.debug( `0 length=${value.length}` );
           value = value.replace(/\s+/g, "");
           value = value.replace(/^978-/, "978");
-          Logger.log( `value=${value}` );
-          Logger.log( `1 length=${value.length}` );
+          YKLiblog.Log.debug( `value=${value}` );
+          YKLiblog.Log.debug( `1 length=${value.length}` );
           this.setColValue(row, 'ISBN', value);
           this.setRow(i, row);
         }
@@ -78,11 +78,11 @@ class Table {
       let value = this.getCol(row, 'ISBN');
       if( (typeof value) === "string" ){
         if( value.length === 10){
-          Logger.log( `0 length=${value.length}` );
+          YKLiblog.Log.debug( `0 length=${value.length}` );
           value = value.replace(/\s+/g, "");
           value = value.replace(/^978-/, "978");
-          Logger.log( `value=${value}` );
-          Logger.log( `1 length=${value.length}` );
+          YKLiblog.Log.debug( `value=${value}` );
+          YKLiblog.Log.debug( `1 length=${value.length}` );
           this.setColValue(row, 'ISBN', value);
           this.setRow(i, row);
         }
@@ -153,7 +153,7 @@ class Table {
       const row = this.getRow(i);
       const shape = this.getCol(row, 'shape');
       const asin = this.getCol(row, 'asin');
-      Logger.log(`shape=${shape} asin=${asin}`);
+      YKLiblog.Log.debug(`shape=${shape} asin=${asin}`);
     }
   }
   showB4(){
@@ -165,54 +165,54 @@ class Table {
         if( isbn.length === 10){
           // Kindle Kindle-U
           if( shape === 3){
-            // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            // YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
           }
           else if( shape === 4){
-            // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            // YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
           }
           else{
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
           }
         }
         else if( isbn.length === 11){
           // Kindle
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 13){
           // 本
           if( shape !== "本"){
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
           }
           else{
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
           }
         }
         else if( isbn.length === 14){
           // 本
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 15){
           // 本
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 5){
           // EBOOK
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          //YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 6){
           // "Kindle"
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          //YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 8){
           // "Kindle-U"
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          //YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 1){
           // "本"
-          // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          // YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
         else{
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.debug(`${shape}|${isbn.length}|${isbn}`);
         }
       }
     }
@@ -224,7 +224,7 @@ class Table {
       if( this.getCol(row, '状態') === '読了' ){
         const shape = this.getCol(row, '形態');
         const isbn = this.getCol(row, 'ISBN');
-        Logger.log(`shape=${shape} isbn=${isbn}`);
+        YKLiblog.Log.info(`shape=${shape} isbn=${isbn}`);
       }
     }
   }
@@ -239,9 +239,9 @@ class Table {
       shape_asoc[this.getCol(row, '形態')] = 0;
       isbn_asoc[this.getCol(row, 'ISBN')] = 0;
     }
-    Logger.log(`status=${ Object.keys(status_asoc)}` );
-    Logger.log(`shape =${ Object.keys(shape_asoc)}` );
-    Logger.log(`isbn  =${ Object.keys(isbn_asoc)}` );
+    YKLiblog.Log.info(`status=${ Object.keys(status_asoc)}` );
+    YKLiblog.Log.info(`shape =${ Object.keys(shape_asoc)}` );
+    YKLiblog.Log.info(`isbn  =${ Object.keys(isbn_asoc)}` );
   }
   show3(){
     let status_asoc = {};
@@ -268,15 +268,15 @@ class Table {
         isbn_asoc[shape][status][isbn] = 0;
       }
     }
-    Logger.log(`status=${ Object.keys(status_asoc)}` );
-    Object.keys(status_asoc).map( key => Logger.log( `key=${key} ${Object.keys( status_asoc[key] )}` ) );
-    Logger.log(`====`);
-    Logger.log(`isbn=${ Object.keys(isbn_asoc)}` );
+    YKLiblog.Log.info(`status=${ Object.keys(status_asoc)}` );
+    Object.keys(status_asoc).map( key => YKLiblog.Log.info( `key=${key} ${Object.keys( status_asoc[key] )}` ) );
+    YKLiblog.Log.info(`====`);
+    YKLiblog.Log.info(`isbn=${ Object.keys(isbn_asoc)}` );
     Object.keys(isbn_asoc).map( shape => {
-      Logger.log( `shape=${shape}` );
+      YKLiblog.Log.info( `shape=${shape}` );
       Object.keys( isbn_asoc[shape] ).map( status => {
-        Logger.log( `  status=${status}` );
-        Logger.log( `    isbn=${  Object.keys( isbn_asoc[shape][status] ) }` );
+        YKLiblog.Log.info( `  status=${status}` );
+        YKLiblog.Log.info( `    isbn=${  Object.keys( isbn_asoc[shape][status] ) }` );
       } );
     } );
   }
@@ -289,54 +289,54 @@ class Table {
         if( isbn.length === 10){
           // Kindle Kindle-U
           if( shape === "Kindle"){
-            // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            // YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
           }
           else if( shape === "Kindle-U"){
-            // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            // YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
           }
           else{
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
           }
         }
         else if( isbn.length === 11){
           // Kindle
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 13){
           // 本
           if( shape !== "本"){
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
           }
           else{
-            Logger.log(`${shape}|${isbn.length}|${isbn}`);
+            YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
           }
         }
         else if( isbn.length === 14){
           // 本
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 15){
           // 本
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 5){
           // EBOOK
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          // YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 6){
           // "Kindle"
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          // YKLiblog.Log.info`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 8){
           // "Kindle-U"
-          //Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          // YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else if( isbn.length === 1){
           // "本"
-          // Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          // YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
         else{
-          Logger.log(`${shape}|${isbn.length}|${isbn}`);
+          YKLiblog.Log.info(`${shape}|${isbn.length}|${isbn}`);
         }
       }
     }
@@ -363,7 +363,7 @@ class Table {
       const shape = this.getCol(row, '形態');
       const status = this.getCol(row, '状態');
       if( status === "読了"){
-        Logger.log(`${isbn}`);
+        YKLiblog.Log.info(`${isbn}`);
       }
     }
   }

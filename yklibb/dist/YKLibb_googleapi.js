@@ -212,7 +212,7 @@ function redirectToUrl(url){
   // スプレッドシートのURLにリダイレクト
   let html = '<meta http-equiv="refresh" content="0; url=' + url + '" />';
   html += '<p>If you are not redirected, <a href="' + url + '">click here</a>.</p>'; // リダイレクトされない場合のリンク
-  Logger.log(`html=${html}`);
+  YKLiblog.Log.debug(`html=${html}`);
   return HtmlService.createHtmlOutput(html)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
@@ -275,29 +275,29 @@ function getFolderByPath(pathArray){
   let folder;
   let folders;
   for(let i=0; i<pathArray.length; i++){
-    Logger.log(`getFolderByPath 1`)
+    YKLiblog.Log.debug(`getFolderByPath 1`)
     folder = null
     if( parentFolder === null){
-      Logger.log(`getFolderByPath 2`)
+      YKLiblog.Log.debug(`getFolderByPath 2`)
       break;
     }
     try{
       folders = parentFolder.getFoldersByName(pathArray[i])
       if( folders.hasNext() ){
         folder = folders.next()
-        Logger.log(`getFolderByPath 3`)
+        YKLiblog.Log.debug(`getFolderByPath 3`)
       }
       else {
-        Logger.log(`getFolderByPath 4`)
+        YKLiblog.Log.debug(`getFolderByPath 4`)
         folder = parentFolder.createFolder(pathArray[i])
       }
       parentFolder = folder
     } catch(e) {
-      Logger.log(`YKLibb 1 getFolderByPath e=${e}`)
+      YKLiblog.Log.fault(`YKLibb 1 getFolderByPath e=${e}`)
       parentFolder = null
     }
   }
-  Logger.log(`getFolderByPath 6`)
+  YKLiblog.Log.debug(`getFolderByPath 6`)
   return folder;
 }
 
@@ -317,9 +317,9 @@ function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
       file = folder.createFile(targetFileName);
     }
   } catch(e) {
-    Logger.log(`YKLibb.getOrCreateFileUnderFolder 10 folder=${folder} e=${e}`);
+    YKLiblog.Log.fault(`YKLibb.getOrCreateFileUnderFolder 10 folder=${folder} e=${e}`);
   }
-  Logger.log(`YKLibb.getOrCreateFileUnderFolder 30 file=${file}`);
+  YKLiblog.Log.debug(`YKLibb.getOrCreateFileUnderFolder 30 file=${file}`);
 
   return file;
 }
@@ -334,43 +334,43 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
   try{
     folder = DriveApp.getFolderById(targetFolderId);
 
-    Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
+    YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
     return folder;
   } catch(e){
-      Logger.log(`YKLibb 2 getOrCreateFolderUnderDocsFolder`) 
+      YKLiblog.Log.fault(`YKLibb 2 getOrCreateFolderUnderDocsFolder`) 
       // do nothing
   }
   if( parentFolder === null ){
     try{
-      Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
       parentFolder = DriveApp.getFolderById(folderInfo.parentFolderId);
-      Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　2 2 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 2 parentFolder=${parentFolder}`);
     } catch(e){
-      Logger.log(`YKLibb 3 getOrCreateFolderUnderDocsFolder`) 
+      YKLiblog.Log.fault(`YKLibb 3 getOrCreateFolderUnderDocsFolder`) 
       // do nothing
     }
   }
   if( parentFolder === null ){
     try{
-      Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　3 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　3 parentFolder=${parentFolder}`);
       parentFolder = getFolderByPath(path_array);
       folderInfo.parentFolderId = parentFolder.getId();
-      Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　3 2 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　3 2 parentFolder=${parentFolder}`);
     } catch(e){
-      Logger.log(`YKLibb 4`) 
+      YKLiblog.Log.fault(`YKLibb 4`) 
       // do nothing
     }
   }
   if( parentFolder === null ){
-    Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder　4 parentFolder=${parentFolder}`);
+    YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　4 parentFolder=${parentFolder}`);
     return null;
   }
   try{
-    Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder 5 0 parentFolder=${parentFolder} targetFolderName=${targetFolderName}`);
+    YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder 5 0 parentFolder=${parentFolder} targetFolderName=${targetFolderName}`);
     const folders = parentFolder.getFolders();
     if( folders.length > 0 ){
       while( folders.hasNext() ){
-        Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder A parentFolder=${parentFolder}`);
+        YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder A parentFolder=${parentFolder}`);
         folder = folders.next()
         if( folder.getName() === targetFolderName ){
           yklibbFolderInfo.folderId = folder.getId()
@@ -380,16 +380,15 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
       }
     }
     else{
-      Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder B parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder B parentFolder=${parentFolder}`);
       folder = parentFolder.createFolder(targetFolderName);
       yklibbFolderInfo.folderId = folder.getId()
       yklibbFolderInfo.folderName = targetFolderName
-
     }
   } catch(e) {
-    Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
+    YKLiblog.Log.fault(`YKLibb.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
   }
-  Logger.log(`YKLibb.getOrCreateFolderUnderDocsFolder 30 folder=${folder}`);
+  YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder 30 folder=${folder}`);
 
   return folder;
 }
@@ -420,7 +419,7 @@ function getEmptyDocsFileIds() {
       }
     } catch (e) {
       // ドキュメントを開けない場合はスキップ(権限不足などでエラーが発生することがあります)
-      Logger.log('YKLibb : Error opening document: ' + fileId + ', error: ' + e);
+      YKLiblog.Log.fault('YKLibb : Error opening document: ' + fileId + ', error: ' + e);
     }
   }
   // 内容が空のGoogleドキュメントファイルのファイルIDの配列を返す
@@ -451,7 +450,7 @@ function searchFilesWithPagination(folderId) {
   if (files && files.length > 0) {
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
-      Logger.log(file.name + ' (' + file.id + ')');
+      YKLiblog.Log.debug(file.name + ' (' + file.id + ')');
       // ファイルに対する処理
     }
   }
@@ -467,7 +466,7 @@ function searchFilesWithPagination(folderId) {
     // 検索終了
     // PropertiesService.getScriptProperties().deleteProperty('pageToken');
     ENV.deletePageToken()
-    Logger.log('検索終了');
+    YKLiblog.Log.debug('検索終了');
   }
 }
 
@@ -490,7 +489,7 @@ function getRootFolderChildrenIds() {
 function getSubFolders(folders){
   if (!folders.hasNext()) {
       if (folders.hasNext()) {
-          Logger.log("Error: 'Computers' or 'パソコン' folder not found.");
+        YKLiblog.Log.debug("Error: 'Computers' or 'パソコン' folder not found.");
           return [];
       }
   }
