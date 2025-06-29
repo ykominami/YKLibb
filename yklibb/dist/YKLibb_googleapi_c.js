@@ -61,10 +61,10 @@ class Googleapi {
     let url;
     switch(kind){
       case "gss":
-        url = Googleapi.getOrCreateSpreadsheetUnderFolder(folderId, fileName);
+        url = Googleapi.getUrlOfSpreadsheetUnderFolder(folderId, fileName);
         break;
       case "docs":
-        url = Googleapi.getOrCreateGoogleDocsUnderFolder(folderId, fileName);
+        url = Googleapi.getUrlOfGoogleDocsUnderFolder(folderId, fileName);
         break;
       default:
         url = "";
@@ -147,13 +147,6 @@ class Googleapi {
     return null;
   }
 
-  /**
-   * @description 指定されたディレクトリの直下に指定名のGoogle Spreadsheetを作成し、それへのURLを返す
-   * @param {string} folderId 指定ディレクトリId (デフォルト: null)
-   * @param {string} fileName 作成するGoogle Spreadsheetのファイル名 (デフォルト: "Untitled")
-   * @return {string} 新しく作成されたGoogle SpreadsheetへのURL
-   * @customfunction
-   */
   static getOrCreateSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
     const folder = Googleapi.getFolderOrRootFolder(folderId)
     let spreadsheet = Googleapi.getSpreadsheetUnderFolderByName(folder, fileName)
@@ -167,6 +160,19 @@ class Googleapi {
 
     // ファイルを指定されたフォルダに移動
     Googleapi.moveFileFromRootFolderToFolder(folder, file)
+  
+    return spreadsheet;
+  }
+
+  /**
+   * @description 指定されたディレクトリの直下に指定名のGoogle Spreadsheetを作成し、それへのURLを返す
+   * @param {string} folderId 指定ディレクトリId (デフォルト: null)
+   * @param {string} fileName 作成するGoogle Spreadsheetのファイル名 (デフォルト: "Untitled")
+   * @return {string} 新しく作成されたGoogle SpreadsheetへのURL
+   * @customfunction
+   */
+  static getUlrOfSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
+    const spreadsheet = Googleapi.getOrCreateSpreadsheetUnderFolder(folderId, fileName)
 
     // スプレッドシートのURLを取得
     const spreadsheetUrl = spreadsheet.getUrl();
@@ -174,16 +180,7 @@ class Googleapi {
     return spreadsheetUrl;
   }
 
-  /**
-   * @description 指定されたディレクトリにGoogle Docsを作成します。
-   * @param {string} fileName 作成するGoogle Docsのファイル名 (デフォルト: "Untitled")
-   * @return {string} 新しく作成されたGoogle DocsへのURL
-   * @customfunction
-   */
   static getOrCreateGoogleDocsUnderFolder(folderId = null, fileName = "Untitled") {
-    // const urlHeadPart = PropertiesService.getScriptProperties().getProperty('URL_HEAD_PART');
-    const urlHeadPart = ENV.urlHeadPart;
-
     // プロジェクトのプロパティからデフォルトのフォルダIDを取得
     const folder = Googleapi.getFolderOrRootFolder(folderId)
     let document = Googleapi.getGoogleDocUnderFolderByName(folder, fileName)
@@ -191,18 +188,61 @@ class Googleapi {
       // スプレッドシートを作成
       document = DocumentApp.create(fileName);
     }
+    return document;
+  }
+  /**
+   * @description 指定されたディレクトリにGoogle Docsを作成します。
+   * @param {string} fileName 作成するGoogle Docsのファイル名 (デフォルト: "Untitled")
+   * @return {string} 新しく作成されたGoogle DocsへのURL
+   * @customfunction
+   */
+  static getUrlOfGoogleDocsUnderFolder(folderId = null, fileName = "Untitled") {
+    // const urlHeadPart = PropertiesService.getScriptProperties().getProperty('URL_HEAD_PART');
+    const urlHeadPart = ENV.urlHeadPart;
 
-    // ドキュメントを作成します。
-    // Google DOcsの元のファイルを取得 (デフォルトではルートフォルダに作成される)
-    // var body = document.getBody();
-    // body.appendParagraph(getCurrentDateTimeJST());
-    // document.saveAndClose();
+    const document = getOrCreateGoogleDocsUnderFolder(folderId, fileName)
+
     const id = document.getId();
     const file = DriveApp.getFileById(id);
     Googleapi.moveFileFromRootFolderToFolder(folder, file);
     const url = urlHeadPart + id;
     return url;
   }
+  
+  static writeToGoogleDocs(documentId, text){
+    // 1. IDを使ってドキュメントを開く
+    const doc = DocumentApp.openById(documentId);
+
+    // 2. ドキュメントの本文(Body)を取得する
+    const body = doc.getBody();
+
+    body.clear(); // この1行が、テキスト、画像、表などすべてを消去します
+
+    body.appendParagraph(text);
+    doc.saveAndClose();
+  }
+  /*
+  static writeFile(){
+    // 3. 本文の末尾に新しい段落としてテキストを追記する
+    //    const textToAppend = "これはスクリプトによって追記されたテキストです。";
+    //     body.appendParagraph(textToAppend);
+
+    // 3. 現在時刻を取得し、フォーマットします
+    // const now = new Date();
+    // const timeZone = Session.getScriptTimeZone(); // スクリプトのタイムゾーンを自動取得
+    // "yyyy/MM/dd HH:mm:ss" の部分はお好みの形式に変更可能です
+    // const formattedTime = Utilities.formatDate(now, timeZone, "yyyy/MM/dd HH:mm:ss");
+
+    // 4. 整形した時刻を、書き出し用のメッセージとともにドキュメントに書き込みます
+    // body.appendParagraph("最終更新日時: " + formattedTime);
+    
+    // 変更を保存します
+    // doc.saveAndClose();
+
+    // console.log("ドキュメントの内容をクリアし、現在時刻を書き込みました。");
+    // console.log(`更新時刻: ${formattedTime}`);
+  }
+  */
 
   /**
    * @description 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします。
@@ -263,7 +303,8 @@ class Googleapi {
       folder = DriveApp.getRootFolder();
     } else {
       try {
-        folder = DriveApp.getFolderById(folderId);
+        // folder = DriveApp.getFolderById(folderId);
+        folder = Googleapi.getFolderById(folderId);
       } catch (e) {
         // IDが存在しないなどでgetできない場合、"0/0-LOG/inbox/etc"フォルダを利用
         folder = DriveApp.getRootFolder();
@@ -296,7 +337,7 @@ class Googleapi {
         }
         parentFolder = folder
       } catch(e) {
-        YKLiblog.Log.faault(`YKLibb.Googleapi 1 getFolderByPath e=${e}`)
+        YKLiblog.Log.fault(`YKLibb.Googleapi 1 getFolderByPath e=${e}`)
         parentFolder = null
       }
     }
@@ -306,7 +347,8 @@ class Googleapi {
 
   static getOrCreateFileUnderFolder(targetFolderId, targetFileName){
     try{
-      const folder = DriveApp.getFolderById(targetFolderId);
+      // const folder = DriveApp.getFolderById(targetFolderId);
+      const folder = Googleapi.getFolderById(targetFolderId);
       const files = folder.getFiles();
       if( files.length > 0 ){
         while( files.hasNext() ){
@@ -326,33 +368,43 @@ class Googleapi {
 
     return file;
   }
+  static getFolderById(folderId){
+    // const folder = DriveApp.getFolderById(folderId);
+    const folder = Googleapi.getFolderById(folderId);
+    if( folder === null ){
+      folder = DriveApp.createFolder(folderId);
+    }
+    return folder;
+  }
 
   static getOrCreateFolderUnderDocsFolder(yklibbFolderInfo, targetFolderId, targetFolderName){
     // const parentFolderId = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_ID');
     // const parentFolderPath = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_PATH');
+    const path_arr = yklibbFolderInfo.parentFolderPath;
     const path_array = yklibbFolderInfo.parentFolderPath.split('>');
     let parentFolder = null;
     let folder = null
 
     try{
-      folder = DriveApp.getFolderById(targetFolderId);
-
+      // folder = DriveApp.getFolderById(targetFolderId);
+      folder = Googleapi.getFolderById(targetFolderId);
       YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
       return folder;
     } catch(e){
-      YKLiblog.Log.faault(`YKLibb 2`)
-      YKLiblog.Log.faault(`e.message=${e.message}`) 
+      YKLiblog.Log.fault(`YKLibb 2`)
+      YKLiblog.Log.fault(`e.message=${e.message}`) 
         // do nothing
     }
     if( parentFolder === null ){
       try{
         YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
-        parentFolder = DriveApp.getFolderById(yklibbFolderInfo.parentFolderId);
+        // parentFolder = DriveApp.getFolderById(yklibbFolderInfo.parentFolderId);
+        parentFolder = Googleapi.getFolderById(yklibbFolderInfo.parentFolderId);
         yklibbFolderInfo.parentFolderId = parentFolder.getId()
         YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　22 parentFolder=${parentFolder}`);
       } catch(e){
-        YKLiblog.Log.faault(`YKLibb 3`) 
-        YKLiblog.Log.faault(`e.message=${e.message}`) 
+        YKLiblog.Log.fault(`YKLibb 3`) 
+        YKLiblog.Log.fault(`e.message=${e.message}`) 
         // do nothing
       }
     }
@@ -363,8 +415,8 @@ class Googleapi {
         yklibbFolderInfo.parentFolderId = parentFolder.getId()
         YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　32 parentFolder=${parentFolder}`);
       } catch(e){
-        YKLiblog.Log.faault(`YKLibb 4`) 
-        YKLiblog.Log.faault(`e.message=${e.message}`) 
+        YKLiblog.Log.fault(`YKLibb 4`) 
+        YKLiblog.Log.fault(`e.message=${e.message}`) 
         // do nothing
       }
     }
@@ -389,11 +441,17 @@ class Googleapi {
         folder = parentFolder.createFolder(targetFolderName);
       }
     } catch(e) {
-      YKLiblog.Log.faault(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
+      YKLiblog.Log.fault(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
     }
     YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 30 folder=${folder}`);
 
     return folder;
+  }
+
+  static outputFileUnderFolder(folder, fileName, rawcontent){
+    const targetFolderId = folder.getId()
+    const doc = getOrCreateFileUnderFolder(targetFolderId, fileName)
+    Googleapi.writeToGoogleDocs(doc.getId(), rawcontent)
   }
 
   /**
@@ -422,7 +480,7 @@ class Googleapi {
         }
       } catch (e) {
         // ドキュメントを開けない場合はスキップ(権限不足などでエラーが発生することがあります)
-        YKLiblog.Log.faault('YKLibb : Error opening document: ' + fileId + ', error: ' + e);
+        YKLiblog.Log.fault('YKLibb : Error opening document: ' + fileId + ', error: ' + e);
       }
     }
     // 内容が空のGoogleドキュメントファイルのファイルIDの配列を返す
@@ -508,7 +566,8 @@ class Googleapi {
     let keys = Object.keys(folderIdByName)
     const folderIdArray = keys.map( key => {
       const folderIds = []
-      const folder = DriveApp.getFolderById( folderIdByName[key] )
+      // const folder = DriveApp.getFolderById( folderIdByName[key] )
+      const folder = Googleapi.getFolderById(folderIdByName[key]);
       const folders = folder.getFolders()
       while( folders.hasNext() ){
         const folder = folders.next()
@@ -542,7 +601,8 @@ class Googleapi {
         }
       }
 
-      const folder = DriveApp.getFolderById( folderIdByName[key] )
+      // const folder = DriveApp.getFolderById( folderIdByName[key] )
+      const folder = Googleapi.getFolderById( folderIdByName[key] );
       const folders = folder.getFolders()
       while( folders.hasNext() ){
         getFoldersRecursively(folders.next())

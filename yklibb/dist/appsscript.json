@@ -1,6 +1,14 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "YKLiblog",
+        "version": "0",
+        "libraryId": "1YvWBToDWYS-TVOVFmAwXDhiW9NHy3Zl7EoeySIoEOWnp01WtcpNlOS1E",
+        "developmentMode": true
+      }
+    ]
   },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"

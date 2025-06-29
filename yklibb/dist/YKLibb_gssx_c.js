@@ -14,12 +14,37 @@ class Gssx {
     return Gssx.setupSpreadsheetX(worksheet);
   }
 
+  /**
+   * スプレッドシートとシートを指定して、ヘッダー行とデータ行を取得します。
+   *
+   * @param {string} spreadsheetId スプレッドシートのID
+   * @param {string} sheetName シート名
+   * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+   */
   static setupSpreadsheetX(worksheet){
     const [values, dataRange] = Gssx.getValuesFromSheet(worksheet); 
     const header =  values.shift();
 
     return [header, values, dataRange];
   }
+
+  /**
+   * スプレッドシートとワークシートをセットアップする。
+   *
+   * @param {string} spreadsheetId スプレッドシートID
+   * @param {string} sheetName ワークシート名
+   * @returns {Array} スプレッドシートとワークシート
+   */
+  static setupForSpreadsheet(spreadsheetId, sheetName){
+    YKLiblog.Log.debug(`spreadsheetId=${spreadsheetId} sheetName=${sheetName}`)
+    // スプレッドシートを開く (IDで指定)
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+
+    // ワークシートを取得 (名前で指定)
+    const worksheet = Gssx.getOrCreateWorksheet(spreadsheet,sheetName);
+    return [spreadsheet, worksheet]; 
+  }
+
   /**
    * スプレッドシート中の空白でないセルをすべて含む最小の領域を取得します。
    *
@@ -116,16 +141,16 @@ class Gssx {
   }
 
   /**
-   * ワークシートから値を取得する。
+   * ワークシートの上端、左端、下橋、右端から空白セルのみの連続した行、列を含まない、値セルをすべて含む長方形領域取得する。
    *
    * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet 取得元のワークシート
    * @returns {Array} ワークシートの値の二次元配列
    */
   static getValuesFromSheet(worksheet){
     // データ範囲を取得
-    var dataRange = Gssx.getMinimalContentRange(worksheet);
+    const dataRange = Gssx.getMinimalContentRange(worksheet);
     // データ範囲の値を取得 (二次元配列)
-    var values = dataRange.getValues();
+    const values = dataRange.getValues();
 
     return [values, dataRange];
   }
@@ -143,22 +168,6 @@ class Gssx {
       sheet = ss.insertSheet(sheetName);
     }
     return sheet;
-  }
-
-  /**
-   * スプレッドシートとワークシートをセットアップする。
-   *
-   * @param {string} spreadsheetId スプレッドシートID
-   * @param {string} sheetName ワークシート名
-   * @returns {Array} スプレッドシートとワークシート
-   */
-  static setupForSpreadsheet(spreadsheetId, sheetName){
-    // スプレッドシートを開く (IDで指定)
-    var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-
-    // ワークシートを取得 (名前で指定)
-    var worksheet = Gssx.getOrCreateWorksheet(spreadsheet,sheetName);
-    return [spreadsheet, worksheet]; 
   }
 
   /**

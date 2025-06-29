@@ -146,6 +146,20 @@ function getGoogleDocUnderFolderByName(folder, docName) {
 }
 
 /**
+ * 指定フォルダ直下の指定名のGoogle Docsファイルを取得、もしくは作成する
+ * @param {Folder} folder フォルダ
+ * @param {string} docName Google Docsファイル名
+ * @return {File} Google Docsファイルオブジェクト
+ */
+function getOrCreateGoogleDocUnderFolderByName(folder, docName) {
+  const file = getGoogleDocUnderFolderByName(folder, docName)
+  if( file === null ){
+    file = folder.createFile(docName)
+  }
+  return file
+}
+
+/**
  * @description 指定されたディレクトリの直下に指定名のGoogle Spreadsheetを作成し、それへのURLを返す
  * @param {string} folderId 指定ディレクトリId (デフォルト: null)
  * @param {string} fileName 作成するGoogle Spreadsheetのファイル名 (デフォルト: "Untitled")
@@ -260,7 +274,8 @@ function getFolderOrRootFolder(folderId) {
     folder = DriveApp.getRootFolder();
   } else {
     try {
-      folder = DriveApp.getFolderById(folderId);
+      // folder = DriveApp.getFolderById(folderId);
+      folder = Googleapi.getOrCreateFolderById(folderId);
     } catch (e) {
       // IDが存在しないなどでgetできない場合、"0/0-LOG/inbox/etc"フォルダを利用
       folder = DriveApp.getRootFolder();
@@ -303,7 +318,8 @@ function getFolderByPath(pathArray){
 
 function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
   try{
-    const folder = DriveApp.getFolderById(targetFolderId);
+    //const folder = DriveApp.getFolderById(targetFolderId);
+    const folder =Googleapi.getOrCreateFolderById(targetFolderId);
     const files = folder.getFiles();
     if( files.length > 0 ){
       while( files.hasNext() ){
@@ -332,18 +348,19 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
   let folder = null
 
   try{
-    folder = DriveApp.getFolderById(targetFolderId);
-
+    //folder = DriveApp.getFolderById(targetFolderId);
+    folder = Googleapi.getOrCreateFolderById(targetFolderId);
     YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
     return folder;
   } catch(e){
-      YKLiblog.Log.fault(`YKLibb 2 getOrCreateFolderUnderDocsFolder`) 
+      YKLiblog.Log.fault(`YKLibb.getOrCreateFolderUnderDocsFolder`) 
       // do nothing
   }
   if( parentFolder === null ){
     try{
       YKLiblog.Log.debug.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
-      parentFolder = DriveApp.getFolderById(folderInfo.parentFolderId);
+      // parentFolder = DriveApp.getFolderById(folderInfo.parentFolderId);
+      parentFolder = Googleapi.getOrCreateFolderById(folderInfo.parentFolderId);
       YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 2 parentFolder=${parentFolder}`);
     } catch(e){
       YKLiblog.Log.fault(`YKLibb 3 getOrCreateFolderUnderDocsFolder`) 
@@ -505,7 +522,8 @@ function getFolderIdsUnderComputersx() {
   let keys = Object.keys(folderIdByName)
   const folderIdArray = keys.map( key => {
     const folderIds = []
-    const folder = DriveApp.getFolderById( folderIdByName[key] )
+    // const folder = DriveApp.getFolderById( folderIdByName[key] )
+    const folder = Googleapi.getOrCreateFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       const folder = folders.next()
@@ -539,7 +557,8 @@ function getFolderIdsUnderComputers() {
       }
     }
 
-    const folder = DriveApp.getFolderById( folderIdByName[key] )
+    // const folder = DriveApp.getFolderById( folderIdByName[key] )
+    const folder = Googleapi.getOrCreateFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       getFoldersRecursively(folders.next())
