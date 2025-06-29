@@ -14,12 +14,37 @@ class Gssx {
     return Gssx.setupSpreadsheetX(worksheet);
   }
 
+  /**
+   * スプレッドシートとシートを指定して、ヘッダー行とデータ行を取得します。
+   *
+   * @param {string} spreadsheetId スプレッドシートのID
+   * @param {string} sheetName シート名
+   * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+   */
   static setupSpreadsheetX(worksheet){
     const [values, dataRange] = Gssx.getValuesFromSheet(worksheet); 
     const header =  values.shift();
 
     return [header, values, dataRange];
   }
+
+  /**
+   * スプレッドシートとワークシートをセットアップする。
+   *
+   * @param {string} spreadsheetId スプレッドシートID
+   * @param {string} sheetName ワークシート名
+   * @returns {Array} スプレッドシートとワークシート
+   */
+  static setupForSpreadsheet(spreadsheetId, sheetName){
+    YKLiblog.Log.debug(`spreadsheetId=${spreadsheetId} sheetName=${sheetName}`)
+    // スプレッドシートを開く (IDで指定)
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+
+    // ワークシートを取得 (名前で指定)
+    const worksheet = Gssx.getOrCreateWorksheet(spreadsheet,sheetName);
+    return [spreadsheet, worksheet]; 
+  }
+
   /**
    * スプレッドシート中の空白でないセルをすべて含む最小の領域を取得します。
    *
@@ -28,8 +53,8 @@ class Gssx {
    */
   static getMinimalContentRange(sheet) {
     if (!sheet) {
-      Logger.log("シートが指定されていません。");
-      return null;
+      YKLiblog.Log.debug("シートが指定されていません。");
+      return sheet.getRange(1, 1, 1, 1);
     }
 
     const lastRow = sheet.getLastRow();
@@ -37,8 +62,8 @@ class Gssx {
 
     // シートにデータがない場合
     if (lastRow === 0 || lastColumn === 0) {
-      Logger.log("シートにデータがありません。");
-      return null;
+      YKLiblog.Log.debug("シートにデータがありません。");
+      return sheet.getRange(1, 1, 1, 1);
     }
 
     // 初期値として、非常に大きな値と小さな値を設定
@@ -66,8 +91,9 @@ class Gssx {
 
     // データが見つからなかった場合（minRowが初期値のまま）
     if (maxRow === 0) {
-      Logger.log("シートに空白でないセルが見つかりませんでした。");
-      return null;
+      YKLiblog.Log.debug("シートに空白でないセルが見つかりませんでした。");
+      // return null;
+      return sheet.getRange(1, 1, 1, 1);
     }
 
     // 最小領域を作成
@@ -103,7 +129,7 @@ class Gssx {
     const newHeight = Math.max(maxConsecutiveCells, lastRow);
 
     // Rangeの高さを修正
-    Logger.log(`adjustDataRangeHeight newHeight=${newHeight} sheet=${sheet.getLastColumn()}`)
+    YKLiblog.Log.debug(`adjustDataRangeHeight newHeight=${newHeight} sheet=${sheet.getLastColumn()}`)
     let range;
     if( newHeight > 1){
       range = sheet.getRange(1, 1, newHeight, sheet.getLastColumn())
@@ -115,16 +141,16 @@ class Gssx {
   }
 
   /**
-   * ワークシートから値を取得する。
+   * ワークシートの上端、左端、下橋、右端から空白セルのみの連続した行、列を含まない、値セルをすべて含む長方形領域取得する。
    *
    * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet 取得元のワークシート
    * @returns {Array} ワークシートの値の二次元配列
    */
   static getValuesFromSheet(worksheet){
     // データ範囲を取得
-    var dataRange = Gssx.adjustDataRangeHeight(worksheet);
+    const dataRange = Gssx.getMinimalContentRange(worksheet);
     // データ範囲の値を取得 (二次元配列)
-    var values = dataRange.getValues();
+    const values = dataRange.getValues();
 
     return [values, dataRange];
   }
@@ -145,22 +171,6 @@ class Gssx {
   }
 
   /**
-   * スプレッドシートとワークシートをセットアップする。
-   *
-   * @param {string} spreadsheetId スプレッドシートID
-   * @param {string} sheetName ワークシート名
-   * @returns {Array} スプレッドシートとワークシート
-   */
-  static setupForSpreadsheet(spreadsheetId, sheetName){
-    // スプレッドシートを開く (IDで指定)
-    var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-
-    // ワークシートを取得 (名前で指定)
-    var worksheet = Gssx.getOrCreateWorksheet(spreadsheet,sheetName);
-    return [spreadsheet, worksheet]; 
-  }
-
-  /**
    * 1つのワークシートの内容をコピーする。
    *
    * @param {number} count ワークシートのカウント
@@ -170,7 +180,7 @@ class Gssx {
    * @returns {Array} 前回の行数と列数
    */
   static copyOneWorksheetContent(count, worksheets, destinationWorksheet, prevNumRows) {
-    Logger.log(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
+    YKLiblog.Log.debug(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
 
     var [values, dataRange] = Gssx.getValuesFromSheet(worksheets[count]);
     var header = values.shift();
@@ -179,7 +189,7 @@ class Gssx {
     if( count === 0 ){
       // headerに対するコピー先の範囲を指定 (コピー元と同じサイズ)
       numRowsOfHeader = 1;
-      Logger.log(`header=${header}`);
+      YKLiblog.Log.debug(`header=${header}`);
       var numColumnsOfHeader = header.length; // values が空でないことを前提 (空の場合はエラーハンドリングが必要)
       var headerRange = destinationWorksheet.getRange(1, 1, numRowsOfHeader, numColumnsOfHeader); // 開始位置はA1セル (1行目、1列目)
       // データを書き込み
@@ -190,14 +200,14 @@ class Gssx {
     var numColumns = values[0].length; // values が空でないことを前提 (空の場合はエラーハンドリングが必要)
     var leftTop = 0;
     var rightBottom = 0;
-    Logger.log(`1 prevNumRows=<span class="math-inline">\{prevNumRows\} numRowsOfHeader\=</span>{numRowsOfHeader}`);
+    YKLiblog.Log.debug(`1 prevNumRows=<span class="math-inline">\{prevNumRows\} numRowsOfHeader\=</span>{numRowsOfHeader}`);
     if( prevNumRows === 0 ){
       leftTop = 1 + numRowsOfHeader;
     }
     else{
       leftTop = prevNumRows;
     }
-    Logger.log(`numRowsOfHeader=<span class="math-inline">\{numRowsOfHeader\} leftTop\=</span>{leftTop} numRows=<span class="math-inline">\{numRows\} numColumns\=</span>{numColumns}`);
+    YKLiblog.Log.debug(`numRowsOfHeader=<span class="math-inline">\{numRowsOfHeader\} leftTop\=</span>{leftTop} numRows=<span class="math-inline">\{numRows\} numColumns\=</span>{numColumns}`);
     var destinationRange = destinationWorksheet.getRange(leftTop, 1, numRows, numColumns); // 開始位置はA1セル (1行目、1列目)
 
     // データを書き込み
@@ -217,16 +227,16 @@ class Gssx {
     var [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, worksheetName);
     var [values, dataRange] = Gssx.getValuesFromSheet(worksheet);
     var rows = values.filter( row => row[0] === "book" && /^\d+$/.test(row[1]) );
-    // Logger.log(`rows=${JSON.stringify(rows)}`);
+    // YKLiblog.Log.debug(`rows=${JSON.stringify(rows)}`);
     var sheetName;
     var rec = {};
     for( var i = 0; i < rows.length; i++){
       var row = rows[i];
-      // Logger.log(`row[1]=${JSON.stringify(row[1])}`);
+      // YKLiblog.Log.debug(`row[1]=${JSON.stringify(row[1])}`);
       switch(rows[i][1]){
         case 2014:
           sheetName = "2014-15";
-          // Logger.log(`sheetName=${JSON.stringify(sheetName)}`);
+          // YKLiblog.Log.debug(`sheetName=${JSON.stringify(sheetName)}`);
           break;
         case 2015:
           sheetName = "2014-15";
@@ -270,8 +280,9 @@ class Gssx {
         default:
           sheetName = "";
       }
-      // Logger.log(`sheetName=${JSON.stringify(sheetName)}`);
+      // YKLiblog.Log.debug(`sheetName=${JSON.stringify(sheetName)}`);
       if( sheetName !== ""){
+        let srcSpreadsheet, srcWorksheet;
         [srcSpreadsheet, srcWorksheet] = Gssx.setupForSpreadsheet(row[4], row[3]);
         dataByYear = {"year": row[1], "sheetname": sheetName, id: row[4], "worksheet": srcWorksheet};
         if( sheetName in rec ){
@@ -281,7 +292,7 @@ class Gssx {
           rec[sheetName] = [];
           rec[sheetName].push(dataByYear);
         }
-        // Logger.log(`0 rec=${JSON.stringify(rec)}`);
+        // YKLiblog.Log.debug(`0 rec=${JSON.stringify(rec)}`);
       }
     }
 
@@ -331,43 +342,43 @@ class Gssx {
    * ワークシートの内容をコピーする。
    */
   static copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
-    Logger.log(`ワークシートの内容`);
+    YKLiblog.Log.debug(`ワークシートの内容`);
     let prevNumRows;
     const sourceWorksheets = Gssx.getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
-    // Logger.log(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
+    // YKLiblog.Log.debug(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
     for( var destinationWorksheetName in sourceWorksheets){
       //if( ! (/^2022/.test(destinationWorksheetName) ) ){
-      //  Logger.log(`continue destinationWorksheetName=${destinationWorksheetName}`)
+      //  YKLiblog.Log.debug(`continue destinationWorksheetName=${destinationWorksheetName}`)
       //  continue;
       //}
-      Logger.log(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
-      Logger.log(`Z 1`);
+      YKLiblog.Log.debug(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
+      YKLiblog.Log.debug(`Z 1`);
       if( !destinationWorksheetName ){
         destinationWorksheetName = "book";
       }
       [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
    destinationWorksheetName);
-      Logger.log(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
-      Logger.log(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
+      YKLiblog.Log.debug(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
+      YKLiblog.Log.debug(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
 
-      Logger.log(`Z 2`);
+      YKLiblog.Log.debug(`Z 2`);
       destinationWorksheet = Gssx.getOrCreateWorksheet(destinationSpreadsheet, destinationWorksheetName);
-      Logger.log(`Z 2 destinationWorksheet=${destinationWorksheet}`);
+      YKLiblog.Log.debug(`Z 2 destinationWorksheet=${destinationWorksheet}`);
       // 全てに先立ちコピー先のワークシートをクリアしておく
       // 必要に応じて書式もクリアする場合 (今回は内容のみコピーするためコメントアウト)
       destinationWorksheet.clearContents();
 
-      Logger.log(`D sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
+      YKLiblog.Log.debug(`D sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
       sourceWorksheet = sourceWorksheets[destinationWorksheetName]
-      Logger.log(`C sourceWorksheet=${JSON.stringify(sourceWorksheet)}`);
+      YKLiblog.Log.debug(`C sourceWorksheet=${JSON.stringify(sourceWorksheet)}`);
       sourceWorksheet.sort(Gssx.compareByYearReverse);
       prevNumRows = 0;
       var srcWorksheets = sourceWorksheet.map( it => it.worksheet );
       for(var count=0; count < srcWorksheets.length; count++){
-        Logger.log(`B copyWorksheetContent count=${count} srcWorksheets=${JSON.stringify(srcWorksheets)} prevNumRows=${prevNumRows}`);
+        YKLiblog.Log.debug(`B copyWorksheetContent count=${count} srcWorksheets=${JSON.stringify(srcWorksheets)} prevNumRows=${prevNumRows}`);
         [prevNumRows, numColumns] = Gssx.copyOneWorksheetContent(count, srcWorksheets, destinationWorksheet, prevNumRows);
       }
-      Logger.log('ワークシートの内容をコピーしました: ' + ' -> ' + destinationWorksheetName);
+      YKLiblog.Log.debug('ワークシートの内容をコピーしました: ' + ' -> ' + destinationWorksheetName);
     }
   }
 
@@ -381,45 +392,45 @@ class Gssx {
   static showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
     let prevNumRows;
     const sourceWorksheets = Gssx.getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
-    // Logger.log(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
+    // YKLiblog.Log.debug(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
     for( var destinationWorksheetName in sourceWorksheets){
       //if( ! (/^2022/.test(destinationWorksheetName) ) ){
-      //  Logger.log(`continue destinationWorksheetName=${destinationWorksheetName}`)
+      //  YKLiblog.Log.debug(`continue destinationWorksheetName=${destinationWorksheetName}`)
       //  continue;
       //}
-      Logger.log(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
-      Logger.log(`Z 1`);
+      YKLiblog.Log.debug(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
+      YKLiblog.Log.debug(`Z 1`);
       if( !destinationWorksheetName ){
         destinationWorksheetName = "book";
       }
       [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
    destinationWorksheetName);
-      Logger.log(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
-      Logger.log(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
+      YKLiblog.Log.debug(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
+      YKLiblog.Log.debug(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
 
-      Logger.log(`Z 2`);
+      YKLiblog.Log.debug(`Z 2`);
       destinationWorksheet = Gssx.getOrCreateWorksheet(destinationSpreadsheet, destinationWorksheetName);
-      Logger.log(`Z 2 destinationWorksheet=${destinationWorksheet}`);
+      YKLiblog.Log.debug(`Z 2 destinationWorksheet=${destinationWorksheet}`);
       // 全てに先立ちコピー先のワークシートをクリアしておく
       // 必要に応じて書式もクリアする場合 (今回は内容のみコピーするためコメントアウト)
       destinationWorksheet.clearContents();
 
-      Logger.log(`D sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
+      YKLiblog.Log.debug(`D sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
       sourceWorksheet = sourceWorksheets[destinationWorksheetName]
-      Logger.log(`C sourceWorksheet=${JSON.stringify(sourceWorksheet)}`);
+      YKLiblog.Log.debug(`C sourceWorksheet=${JSON.stringify(sourceWorksheet)}`);
       sourceWorksheet.sort(Gssx.compareByYearReverse);
       prevNumRows = 0;
       var srcWorksheets = sourceWorksheet.map( it => it.worksheet );
       for(var count=0; count < srcWorksheets.length; count++){
-        Logger.log(`B copyWorksheetContent count=${count} srcWorksheets=${JSON.stringify(srcWorksheets)} prevNumRows=${prevNumRows}`);
+        YKLiblog.Log.debug(`B copyWorksheetContent count=${count} srcWorksheets=${JSON.stringify(srcWorksheets)} prevNumRows=${prevNumRows}`);
         [prevNumRows, numColumns] = Gssx.showOneWorksheetContent(count, srcWorksheets, destinationWorksheet, prevNumRows);
       }
-      Logger.log('ワークシートの内容をコピーしました: ' + ' -> ' + destinationWorksheetName);
+      YKLiblog.Log.debug('ワークシートの内容をコピーしました: ' + ' -> ' + destinationWorksheetName);
     }
   }
 
   static showOneWorksheetContent(count, worksheets, destinationWorksheet, prevNumRows) {
-    Logger.log(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
+    YKLiblog.Log.debug(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
 
     var [values, dataRange] = Gssx.getValuesFromSheet(worksheets[count]);
     var header = values.shift();
@@ -431,7 +442,7 @@ class Gssx {
     var numColumns = values[0].length; // values が空でないことを前提 (空の場合はエラーハンドリングが必要)
     var leftTop = 0;
     var rightBottom = 0;
-    Logger.log(`1 prevNumRows=<span class="math-inline">\{prevNumRows\} numRowsOfHeader\=</span>{numRowsOfHeader}`);
+    YKLiblog.Log.debug(`1 prevNumRows=<span class="math-inline">\{prevNumRows\} numRowsOfHeader\=</span>{numRowsOfHeader}`);
     if( prevNumRows === 0 ){
       leftTop = 1 + numRowsOfHeader;
     }
@@ -458,11 +469,10 @@ class Gssx {
   static getAllWorksheetNames(spreadsheetId) {
     try {
       const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-      const sheets = spreadsheet.getSheets();
-      const sheetNames = sheets.map(sheet => sheet.getName());
+      const sheetNames = spreadsheet.getSheets().map(sheet => sheet.getName());
       return sheetNames;
     } catch (error) {
-      console.error("スプレッドシートの取得に失敗しました:", error);
+      YKLiblog.Log.fault("スプレッドシートの取得に失敗しました:", error);
       return []; // エラー発生時は空の配列を返します
     }
   }
