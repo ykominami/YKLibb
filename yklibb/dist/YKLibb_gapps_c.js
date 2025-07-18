@@ -1,4 +1,4 @@
-class Googleapi {
+class Gapps {
 
   /**
    * @description 指定された名前とURLを持つアイテムをXObjオブジェクトに追加します。
@@ -6,9 +6,9 @@ class Googleapi {
    * @param {string} url アイテムのURL
    */
   static addItem(name, url){
-    Googleapi.XObj[name] = {};
-    Googleapi.XObj[name]['url'] = url;
-    Googleapi.XObj[name]['name'] = name;
+    Gapps.XObj[name] = {};
+    Gapps.XObj[name]['url'] = url;
+    Gapps.XObj[name]['name'] = name;
   }
 
   /**
@@ -30,7 +30,7 @@ class Googleapi {
    * @return {HtmlOutput} HTML出力
    */
   static showUrl(name, linkUrl){
-    Googleapi.addItem(name, linkUrl);
+    Gapps.addItem(name, linkUrl);
     return HtmlService.createHtmlOutput(
       `<html><head><base target="_top" /></head><body><a href="${linkUrl}">${name}</a></body></html>`
     );
@@ -42,11 +42,11 @@ class Googleapi {
    * @return {object} XObjオブジェクト
    */
   static getData() {
-    return Googleapi.XObj;
+    return Gapps.XObj;
   }
 
   static test_x(){
-    Googleapi.getOrCreateGoogleAppsFileUnderFolderAndRet();
+    Gapps.getOrCreateGoogleAppsFileUnderFolderAndRet();
   }
 
   /**
@@ -61,10 +61,10 @@ class Googleapi {
     let url;
     switch(kind){
       case "gss":
-        url = Googleapi.getUrlOfSpreadsheetUnderFolder(folderId, fileName);
+        url = Gapps.getUrlOfSpreadsheetUnderFolder(folderId, fileName);
         break;
       case "docs":
-        url = Googleapi.getUrlOfGoogleDocsUnderFolder(folderId, fileName);
+        url = Gapps.getUrlOfGoogleDocsUnderFolder(folderId, fileName);
         break;
       default:
         url = "";
@@ -72,10 +72,10 @@ class Googleapi {
     }
     switch(rettype){
       case "redirect":
-        return Googleapi.redirectToUrl(url);
+        return Gapps.redirectToUrl(url);
         break;
       case  "showUrl":
-        return Googleapi.showUrl(fileName, url);
+        return Gapps.showUrl(fileName, url);
       default:
         return HtmlService.createHtmlOutput("<b>エラー: " + `unknown rettype=${rettype}` + "</b>");
     }
@@ -93,10 +93,10 @@ class Googleapi {
     let url;
     switch(kind){
       case "gss":
-        url = Googleapi.createSpreadsheetUnderFolder(folderId, fileName);
+        url = Gapps.createSpreadsheetUnderFolder(folderId, fileName);
         break;
       case "docs":
-        url = Googleapi.createGoogleDocsUnderFolder(folderId, fileName);
+        url = Gapps.createGoogleDocsUnderFolder(folderId, fileName);
         break;
       default:
         url = "";
@@ -104,10 +104,10 @@ class Googleapi {
     }
     switch(rettype){
       case "redirect":
-        return Googleapi.redirectToUrl(url);
+        return Gapps.redirectToUrl(url);
         break;
       case  "showUrl":
-        return Googleapi.showUrl(fileName, url);
+        return Gapps.showUrl(fileName, url);
       default:
         return HtmlService.createHtmlOutput("<b>エラー: " + `unknown rettype=${rettype}` + "</b>");
     }
@@ -148,8 +148,8 @@ class Googleapi {
   }
 
   static getOrCreateSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
-    const folder = Googleapi.getFolderOrRootFolder(folderId)
-    let spreadsheet = Googleapi.getSpreadsheetUnderFolderByName(folder, fileName)
+    const folder = Gapps.getFolderOrRootFolder(folderId)
+    let spreadsheet = Gapps.getSpreadsheetUnderFolderByName(folder, fileName)
     if( spreadsheet === null ){
       // スプレッドシートを作成
       spreadsheet = SpreadsheetApp.create(fileName);
@@ -159,7 +159,7 @@ class Googleapi {
     const file = DriveApp.getFileById(spreadsheet.getId());
 
     // ファイルを指定されたフォルダに移動
-    Googleapi.moveFileFromRootFolderToFolder(folder, file)
+    Gapps.moveFileFromRootFolderToFolder(folder, file)
   
     return spreadsheet;
   }
@@ -172,7 +172,7 @@ class Googleapi {
    * @customfunction
    */
   static getUlrOfSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
-    const spreadsheet = Googleapi.getOrCreateSpreadsheetUnderFolder(folderId, fileName)
+    const spreadsheet = Gapps.getOrCreateSpreadsheetUnderFolder(folderId, fileName)
 
     // スプレッドシートのURLを取得
     const spreadsheetUrl = spreadsheet.getUrl();
@@ -182,8 +182,8 @@ class Googleapi {
 
   static getOrCreateGoogleDocsUnderFolder(folderId = null, fileName = "Untitled") {
     // プロジェクトのプロパティからデフォルトのフォルダIDを取得
-    const folder = Googleapi.getFolderOrRootFolder(folderId)
-    let document = Googleapi.getGoogleDocUnderFolderByName(folder, fileName)
+    const folder = Gapps.getFolderOrRootFolder(folderId)
+    let document = Gapps.getGoogleDocUnderFolderByName(folder, fileName)
     if( document === null ){
       // スプレッドシートを作成
       document = DocumentApp.create(fileName);
@@ -204,45 +204,45 @@ class Googleapi {
 
     const id = document.getId();
     const file = DriveApp.getFileById(id);
-    Googleapi.moveFileFromRootFolderToFolder(folder, file);
+    Gapps.moveFileFromRootFolderToFolder(folder, file);
     const url = urlHeadPart + id;
     return url;
   }
-  
-  static writeToGoogleDocs(documentId, text){
+  static writeToGoogleDocs(doc, text){
+    try{
+      YKLiblog.Log.debug(`3 doc.constructor=${doc.constructor}`)
+      // 2. ドキュメントの本文(Body)を取得する
+      const body = doc.getBody();
+      body.clear(); // この1行が、テキスト、画像、表などすべてを消去します
+
+      body.appendParagraph(text);
+      doc.saveAndClose();
+    }
+    catch(e){
+      YKLiblog.Log.debug(`3 e.name=${e.name}`)
+      YKLiblog.Log.debug(`3 e.message=${e.message}`)
+      YKLiblog.Log.debug(`3 e.stack=${e.stack}` )
+    }
+  }  
+  static writeToGoogleDocsById(documentId, text){
     // 1. IDを使ってドキュメントを開く
-    const doc = DocumentApp.openById(documentId);
+    try{
+      const doc = DocumentApp.openById(documentId);
+      // 2. ドキュメントの本文(Body)を取得する
+      const body = doc.getBody();
 
-    // 2. ドキュメントの本文(Body)を取得する
-    const body = doc.getBody();
+      body.clear(); // この1行が、テキスト、画像、表などすべてを消去します
 
-    body.clear(); // この1行が、テキスト、画像、表などすべてを消去します
-
-    body.appendParagraph(text);
-    doc.saveAndClose();
+      body.appendParagraph(text);
+      doc.saveAndClose();
+    }
+    catch(e){
+      YKLiblog.Log.debug(`4 documentId=${documentId}`)
+      YKLiblog.Log.debug(`4 e.name=${e.name}`)
+      YKLiblog.Log.debug(`4 e.message=${e.message}`)
+      YKLiblog.Log.debug(`4 e.stack=${e.stack}`)
+    }
   }
-  /*
-  static writeFile(){
-    // 3. 本文の末尾に新しい段落としてテキストを追記する
-    //    const textToAppend = "これはスクリプトによって追記されたテキストです。";
-    //     body.appendParagraph(textToAppend);
-
-    // 3. 現在時刻を取得し、フォーマットします
-    // const now = new Date();
-    // const timeZone = Session.getScriptTimeZone(); // スクリプトのタイムゾーンを自動取得
-    // "yyyy/MM/dd HH:mm:ss" の部分はお好みの形式に変更可能です
-    // const formattedTime = Utilities.formatDate(now, timeZone, "yyyy/MM/dd HH:mm:ss");
-
-    // 4. 整形した時刻を、書き出し用のメッセージとともにドキュメントに書き込みます
-    // body.appendParagraph("最終更新日時: " + formattedTime);
-    
-    // 変更を保存します
-    // doc.saveAndClose();
-
-    // console.log("ドキュメントの内容をクリアし、現在時刻を書き込みました。");
-    // console.log(`更新時刻: ${formattedTime}`);
-  }
-  */
 
   /**
    * @description 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします。
@@ -283,7 +283,7 @@ class Googleapi {
    * @customfunction
    */
   static moveFileToTargetFolder(folderId, defaultFolderName, file){
-    const folder = Googleapi.getFolderOrRootFolder(folderId);
+    const folder = Gapps.getFolderOrRootFolder(folderId);
 
     // ファイルを指定されたフォルダに移動
     folder.addFile(file);
@@ -303,8 +303,7 @@ class Googleapi {
       folder = DriveApp.getRootFolder();
     } else {
       try {
-        // folder = DriveApp.getFolderById(folderId);
-        folder = Googleapi.getFolderById(folderId);
+        folder = Gapps.getFolderById(folderId);
       } catch (e) {
         // IDが存在しないなどでgetできない場合、"0/0-LOG/inbox/etc"フォルダを利用
         folder = DriveApp.getRootFolder();
@@ -312,44 +311,130 @@ class Googleapi {
     }
     return folder;
   }
-
-  static getFolderByPath(pathArray){
-    rootFolder = DriveApp.getRootFolder();
-    parentFolder = rootFolder;
-    let folder;
+  static getOrCreateFolder(folderId, path){
+    let foder
+    if( folderId ){
+      YKLiblog.Log.debug(`folderId=${folderId}`)
+      try{
+        folder = Gapps.getFolderById(folderId)
+      }
+      catch(e){
+        YKLiblog.Log.unknown(e)
+        folderId = null
+      }
+    }
+    if( !folderId ){
+      folder = YKLibb.Gapps.getOrCreateFolderByPathString(path)
+    }
+    return folder
+  }
+  static getOrCreateFolderByPathString(path){
+    const pathArray = path.split('>')
+    const folder =  Gapps.getOrCreateFolderByPath(pathArray)
+    return folder
+  }
+  static getOrCreateFolderByPath(pathArray){
+    let folder = null;
     let folders;
+
+    let rootFolder = DriveApp.getRootFolder();
+    let parentFolder = rootFolder;
     for(let i=0; i<pathArray.length; i++){
-      YKLiblog.Log.debug(`getFolderByPath 1`)
-      folder = null
+      YKLiblog.Log.debug(`getOrCreateFolderByPath 1`)
+      // folder = null
       if( parentFolder === null){
-        YKLiblog.Log.debug(`getFolderByPath 2`)
+        YKLiblog.Log.debug(`getOrCreateFolderByPath 2`)
         break;
       }
       try{
         folders = parentFolder.getFoldersByName(pathArray[i])
         if( folders.hasNext() ){
           folder = folders.next()
-          YKLiblog.Log.debug(`getFolderByPath 3`)
+          YKLiblog.Log.debug(`getOrCreateFolderByPath 3`)
         }
         else {
-          YKLiblog.Log.debug(`getFolderByPath 4`)
+          YKLiblog.Log.debug(`getOrCreateFolderByPath 4`)
           folder = parentFolder.createFolder(pathArray[i])
         }
         parentFolder = folder
       } catch(e) {
-        YKLiblog.Log.fault(`YKLibb.Googleapi 1 getFolderByPath e=${e}`)
+        YKLiblog.Log.fault(`6 YKLibb.Gapps 1 getOrCreateFolderByPath e=${e}`)
         parentFolder = null
       }
     }
-    YKLiblog.Log.debug(`getFolderByPath 6`)
+    YKLiblog.Log.debug(`getOrCreateFolderByPath 6`)
     return folder;
   }
 
-  static getOrCreateFileUnderFolder(targetFolderId, targetFileName){
+  /**
+   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、
+   * 存在すればそのフォルダIDを、存在しなければ新規作成してそのフォルダIDを返します。
+   *
+   * @param {object} parentFolder 親フォルダ
+   * @param {string} folderName 検索または作成するフォルダ名
+   * @returns {string} 見つかった、または新規作成されたフォルダのID
+   */
+  static getOrCreateFolderId(parentFolder, folderName) {
+    try {
+      // 親フォルダの直下にあるフォルダを検索
+      const subFolders = parentFolder.getFolders();
+      while (subFolders.hasNext()) {
+        const folder = subFolders.next();
+        if (folder.getName() === folderName) {
+          // 指定したフォルダ名が見つかった場合、そのIDを返す
+          YKLiblog.Log.info(`"${folderName}" フォルダが既存のため、IDを返します: ${folder.getId()}`);
+          return folder.getId();
+        }
+      }
+
+      // 指定したフォルダ名が見つからなかった場合、新規作成する
+      const newFolder = parentFolder.createFolder(folderName);
+      YKLiblog.Log.info(`"${folderName}" フォルダを新規作成しました。ID: ${newFolder.getId()}`);
+      return newFolder.getId();
+
+    } catch (e) {
+      YKLiblog.Log.error("エラーが発生しました: " + e.toString());
+      throw new Error("フォルダの取得または作成中にエラーが発生しました。入力IDとアクセス権を確認してください。");
+    }
+  }
+
+  /**
+   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、
+   * 存在すればそのフォルダを、存在しなければ新規作成してそのフォルダを返します。
+   *
+   * @param {object} parentFolder 親フォルダ
+   * @param {string} folderName 検索または作成するフォルダ名
+   * @returns {object} 見つかった、または新規作成されたフォルダ
+   */
+  static getOrCreateFolder(parentFolder, folderName) {
+    let folder = null
+    try {
+      // 親フォルダの直下にあるフォルダを検索
+      const subFolders = parentFolder.getFolders();
+      while (subFolders.hasNext()) {
+        folder = subFolders.next();
+        if (folder.getName() === folderName) {
+          // 指定したフォルダ名が見つかった場合、そのIDを返す
+          YKLiblog.Log.info(`"${folderName}" フォルダが既存のため、IDを返します: ${folder.getId()}`);
+          return folder;
+        }
+      }
+
+      // 指定したフォルダ名が見つからなかった場合、新規作成する
+      const newFolder = parentFolder.createFolder(folderName);
+      YKLiblog.Log.info(`"${folderName}" フォルダを新規作成しました。ID: ${newFolder.getId()}`);
+      return newFolder;
+
+    } catch (e) {
+      YKLiblog.Log.error("エラーが発生しました: " + e.toString());
+      throw new Error("フォルダの取得または作成中にエラーが発生しました。入力IDとアクセス権を確認してください。");
+    }
+  }
+
+  static getOrCreateFileUnderFolder(targetFolder, targetFileName){
+    let file = null
     try{
-      // const folder = DriveApp.getFolderById(targetFolderId);
-      const folder = Googleapi.getFolderById(targetFolderId);
-      const files = folder.getFiles();
+      const files = targetFolder.getFiles();
       if( files.length > 0 ){
         while( files.hasNext() ){
           file = files.next()
@@ -359,77 +444,109 @@ class Googleapi {
         }
       }
       else{
-        file = folder.createFile(targetFileName);
+        file = targetFolder.createFile(targetFileName, "");
       }
     } catch(e) {
-      YKLiblog.Log.faault(`YKLibb.Googleapi.getOrCreateFileUnderFolder 10 folder=${folder} e=${e}`);
+      YKLiblog.Log.fault(`7 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
+      YKLiblog.Log.debug(`7 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
+      YKLiblog.Log.debug(`7 e.name=${e.name}`)
+      YKLiblog.Log.debug(`7 e.message=${e.mssage}`)
+      YKLiblog.Log.debug(`7 e.stack=${e.stack}`)
     }
-    YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFileUnderFolder 30 file=${file}`);
+    YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
+    YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
+
+    return file;
+  }
+  static getOrCreateFileUnderFolderById(targetFolderId, targetFileName){
+    let file = null
+    let targetFolder = null
+    try{
+      targetFolder = DriveApp.getFolderById(targetFolderId)
+      const files = targetFolder.getFiles();
+      if( files.length > 0 ){
+        while( files.hasNext() ){
+          file = files.next()
+          if( file.getName() === targetFileName ){
+            break
+          }
+        }
+      }
+      else{
+        file = targetFolder.createFile(targetFileName, "");
+      }
+    } catch(e) {
+      YKLiblog.Log.fault(`8 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
+      YKLiblog.Log.debug(`8 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
+      YKLiblog.Log.debug(`8 e.name=${e.name}`)
+      YKLiblog.Log.debug(`8 e.message=${e.mssage}`)
+      YKLiblog.Log.debug(`8 e.stack=${e.stack}`)
+    }
+    YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
+    YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
 
     return file;
   }
   static getFolderById(folderId){
-    // const folder = DriveApp.getFolderById(folderId);
-    const folder = Googleapi.getFolderById(folderId);
-    if( folder === null ){
-      folder = DriveApp.createFolder(folderId);
-    }
-    return folder;
+    const folder = DriveApp.getFolderById(folderId);
+    return folder
   }
 
-  static getOrCreateFolderUnderDocsFolder(yklibbFolderInfo, targetFolderId, targetFolderName){
-    // const parentFolderId = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_ID');
-    // const parentFolderPath = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_PATH');
-    const path_arr = yklibbFolderInfo.parentFolderPath;
-    const path_array = yklibbFolderInfo.parentFolderPath.split('>');
+  static getOrCreateFolderUnderSpecifiedFolder(yklibbFolderInfo, targetFolderId, targetFolderName){
+    YKLiblog.Log.debug(`YKLibb Gapps getOrCreateFolderUnderSpecifiedFolder targetFolderId=${targetFolderId} targetFolderName=${targetFolderName}` )
+    const parentFolderPath = yklibbFolderInfo.getParentFolderPath();
+    const parentFolderId = yklibbFolderInfo.getParentFolderId()
+
+    YKLiblog.Log.debug(`YKLibb Gapps getOrCreateFolderUnderSpecifiedFolder parentFolderPath=${parentFolderPath}`)
+    const path_array = parentFolderPath.split('>');
     let parentFolder = null;
     let folder = null
 
     try{
-      // folder = DriveApp.getFolderById(targetFolderId);
-      folder = Googleapi.getFolderById(targetFolderId);
-      YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
+      folder = Gapps.getFolderById(targetFolderId);
+      YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 1 folder=${folder}`);
       return folder;
     } catch(e){
-      YKLiblog.Log.fault(`YKLibb 2`)
-      YKLiblog.Log.fault(`e.message=${e.message}`) 
+      YKLiblog.Log.debug(`9 YKLibb 2`)
+      YKLiblog.Log.debug(`9 e.message=${e.message}`) 
         // do nothing
     }
     if( parentFolder === null ){
       try{
-        YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
-        // parentFolder = DriveApp.getFolderById(yklibbFolderInfo.parentFolderId);
-        parentFolder = Googleapi.getFolderById(yklibbFolderInfo.parentFolderId);
-        yklibbFolderInfo.parentFolderId = parentFolder.getId()
-        YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　22 parentFolder=${parentFolder}`);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 2 path_array=${ JSON.stringify(path_array) }`);
+        parentFolder = Gapps.getFolderById(yklibbFolderInfo.parentFolderId);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 22 parentFolderId=${parentFolderId}`);
+        parentFolder = Gapps.getFolderById(parentFolderId);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 23 parentFolder=${parentFolder}`);
       } catch(e){
-        YKLiblog.Log.fault(`YKLibb 3`) 
-        YKLiblog.Log.fault(`e.message=${e.message}`) 
+        YKLiblog.Log.debug(`10 YKLibb 3`) 
+        YKLiblog.Log.debug(`10 e.message=${e.message}`) 
         // do nothing
       }
     }
     if( parentFolder === null ){
       try{
-        YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　3 parentFolder=${parentFolder}`);
-        parentFolder = Googleapi.getFolderByPath(path_array);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 3 parentFolder=${parentFolder}`);
+        parentFolder = Gapps.getOrCreateFolderByPath(path_array);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 3-2 `)
         yklibbFolderInfo.parentFolderId = parentFolder.getId()
-        YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　32 parentFolder=${parentFolder}`);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 32 parentFolder=${parentFolder}`);
       } catch(e){
-        YKLiblog.Log.fault(`YKLibb 4`) 
-        YKLiblog.Log.fault(`e.message=${e.message}`) 
+        YKLiblog.Log.debug(`11 YKLibb 4`) 
+        YKLiblog.Log.debug(`11 e.message=${e.message}`) 
         // do nothing
       }
     }
     if( parentFolder === null ){
-      YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder　4 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 4 parentFolder=${parentFolder}`);
       return null;
     }
     try{
-      YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 5 0 parentFolder=${parentFolder} targetFolderName=${targetFolderName}`);
+      YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 5 0 parentFolder=${parentFolder} targetFolderName=${targetFolderName}`);
       const folders = parentFolder.getFolders();
       if( folders.length > 0 ){
         while( folders.hasNext() ){
-          YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder A parentFolder=${parentFolder}`);
+          YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder A parentFolder=${parentFolder}`);
           folder = folders.next()
           if( folder.getName() === targetFolderName ){
             break
@@ -437,21 +554,60 @@ class Googleapi {
         }
       }
       else{
-        YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder B parentFolder=${parentFolder}`);
+        YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder B parentFolder=${parentFolder}`);
         folder = parentFolder.createFolder(targetFolderName);
       }
     } catch(e) {
-      YKLiblog.Log.fault(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
+      YKLiblog.Log.debug(`12 YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 10 folder=${folder} e=${e}`);
     }
-    YKLiblog.Log.debug(`YKLibb.Googleapi.getOrCreateFolderUnderDocsFolder 30 folder=${folder}`);
+    YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 30 folder=${folder}`);
 
     return folder;
   }
 
   static outputFileUnderFolder(folder, fileName, rawcontent){
     const targetFolderId = folder.getId()
-    const doc = getOrCreateFileUnderFolder(targetFolderId, fileName)
-    Googleapi.writeToGoogleDocs(doc.getId(), rawcontent)
+    YKLiblog.Log.debug(`outputFileUnderFolder targetFolderId=${targetFolderId}`)
+    const doc = Gapps.getOrCreateFileUnderFolderById(targetFolderId, fileName)
+    if( doc === null ){
+      YKLiblog.Log.debug(`outputFileUnderFolder doc=null filenName=${fileName}`)
+      return false
+    }
+    try{
+      YKLiblog.Log.debug(`doc=${doc}`)
+      const docId = doc.getId()
+      YKLiblog.Log.debug(`docId=${docId}`)
+      Gapps.writeToGoogleDocs(doc, rawcontent)
+      return true
+    }
+    catch(e){
+      YKLiblog.Log.debug(`2 e.name=${e.name}`)
+      YKLiblog.Log.debug(`2 e.message=${e.message}`)
+      YKLiblog.Log.debug(`2 e.stack=${e.stack}`)
+    }
+    return false
+  }
+
+  static outputFileUnderFolderById(targetFolderId, fileName, rawcontent){
+    YKLiblog.Log.debug(`outputFileUnderFolderById targetFolderId=${targetFolderId}`)
+    const doc = Gapps.getOrCreateFileUnderFolderById(targetFolderId, fileName)
+    if( doc === null ){
+      YKLiblog.Log.debug(`outputFileUnderFolder doc=null filenName=${fileName}`)
+      return false
+    }
+    try{
+      YKLiblog.Log.debug(`doc=${doc}`)
+      const docId = doc.getId()
+      YKLiblog.Log.debug(`docId=${docId}`)
+      Gapps.writeToGoogleDocs(doc, rawcontent)
+      return true
+    }
+    catch(e){
+      YKLiblog.Log.debug(`1 e.name=${e.name}`)
+      YKLiblog.Log.debug(`1 e.message=${e.message}`)
+      YKLiblog.Log.debug(`1 e.stack=${e.stack}`)
+    }
+    return false
   }
 
   /**
@@ -521,7 +677,7 @@ class Googleapi {
 
     if (pageToken) {
       // まだ続きがある場合は、再度実行
-      Googleapi.searchFilesWithPagination();
+      Gapps.searchFilesWithPagination();
     } else {
       // 検索終了
       // PropertiesService.getScriptProperties().deleteProperty('pageToken');
@@ -566,8 +722,7 @@ class Googleapi {
     let keys = Object.keys(folderIdByName)
     const folderIdArray = keys.map( key => {
       const folderIds = []
-      // const folder = DriveApp.getFolderById( folderIdByName[key] )
-      const folder = Googleapi.getFolderById(folderIdByName[key]);
+      const folder = Gapps.getFolderById(folderIdByName[key]);
       const folders = folder.getFolders()
       while( folders.hasNext() ){
         const folder = folders.next()
@@ -601,8 +756,7 @@ class Googleapi {
         }
       }
 
-      // const folder = DriveApp.getFolderById( folderIdByName[key] )
-      const folder = Googleapi.getFolderById( folderIdByName[key] );
+      const folder = Gapps.getFolderById( folderIdByName[key] );
       const folders = folder.getFolders()
       while( folders.hasNext() ){
         getFoldersRecursively(folders.next())
@@ -613,4 +767,4 @@ class Googleapi {
   }
 }
 
-this.Googleapi = Googleapi;
+this.Gapps = Gapps;
