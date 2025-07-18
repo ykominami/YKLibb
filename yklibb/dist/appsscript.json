@@ -7,6 +7,19 @@
         "version": "0",
         "libraryId": "1YvWBToDWYS-TVOVFmAwXDhiW9NHy3Zl7EoeySIoEOWnp01WtcpNlOS1E",
         "developmentMode": true
+      },
+      {
+        "userSymbol": "YKLiba",
+        "version": "0",
+        "libraryId": "1WnoiJbLCnigDK2sfl5wEvODqBSfVE0nCzV2nwy5NCMtrXHVZknPZZagE",
+        "developmentMode": true
+      }
+    ],
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "Sheets",
+        "version": "v4",
+        "serviceId": "sheets"
       }
     ]
   },

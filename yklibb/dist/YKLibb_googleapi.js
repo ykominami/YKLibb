@@ -275,9 +275,13 @@ function getFolderOrRootFolder(folderId) {
   } else {
     try {
       // folder = DriveApp.getFolderById(folderId);
-      folder = Googleapi.getOrCreateFolderById(folderId);
+      folder = Gapps.getOrCreateFolderById(folderId);
     } catch (e) {
       // IDが存在しないなどでgetできない場合、"0/0-LOG/inbox/etc"フォルダを利用
+      YKLiblog.Log.debug(e.name)
+      YKLiblog.Log.debug(e.message)
+      YKLiblog.Log.debug(e.stack)
+
       folder = DriveApp.getRootFolder();
     }
   }
@@ -319,7 +323,7 @@ function getFolderByPath(pathArray){
 function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
   try{
     //const folder = DriveApp.getFolderById(targetFolderId);
-    const folder =Googleapi.getOrCreateFolderById(targetFolderId);
+    const folder =Gapps.getOrCreateFolderById(targetFolderId);
     const files = folder.getFiles();
     if( files.length > 0 ){
       while( files.hasNext() ){
@@ -349,7 +353,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
 
   try{
     //folder = DriveApp.getFolderById(targetFolderId);
-    folder = Googleapi.getOrCreateFolderById(targetFolderId);
+    folder = Gapps.getOrCreateFolderById(targetFolderId);
     YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
     return folder;
   } catch(e){
@@ -360,7 +364,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
     try{
       YKLiblog.Log.debug.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
       // parentFolder = DriveApp.getFolderById(folderInfo.parentFolderId);
-      parentFolder = Googleapi.getOrCreateFolderById(folderInfo.parentFolderId);
+      parentFolder = Gapps.getOrCreateFolderById(folderInfo.parentFolderId);
       YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 2 parentFolder=${parentFolder}`);
     } catch(e){
       YKLiblog.Log.fault(`YKLibb 3 getOrCreateFolderUnderDocsFolder`) 
@@ -523,7 +527,7 @@ function getFolderIdsUnderComputersx() {
   const folderIdArray = keys.map( key => {
     const folderIds = []
     // const folder = DriveApp.getFolderById( folderIdByName[key] )
-    const folder = Googleapi.getOrCreateFolderById( folderIdByName[key] );
+    const folder = Gapps.getOrCreateFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       const folder = folders.next()
@@ -558,7 +562,7 @@ function getFolderIdsUnderComputers() {
     }
 
     // const folder = DriveApp.getFolderById( folderIdByName[key] )
-    const folder = Googleapi.getOrCreateFolderById( folderIdByName[key] );
+    const folder = Gapps.getOrCreateFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       getFoldersRecursively(folders.next())
