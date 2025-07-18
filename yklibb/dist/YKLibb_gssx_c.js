@@ -13,12 +13,28 @@ class Gssx {
     const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
     return Gssx.setupSpreadsheetForHeaderAndValues(worksheet);
   }
+
+  /**
+   * スプレッドシートとシートを指定して、スプレッドシート、ワークシート、値、データ範囲を取得します。
+   *
+   * @param {string} spreadsheetId スプレッドシートのID
+   * @param {string} sheetName シート名
+   * @return {Array<any>} [spreadsheet, worksheet, values, totalRange] スプレッドシート、ワークシート、値、データ範囲
+   */
   static setupSpeadsheetValues(spreadsheetId, sheetName){
     const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
     const totalRange = Gssx.getMinimalContentRange(worksheet)
     const values = totalRange.getValues()
     return [spreadsheet, worksheet, values, totalRange]
   }
+
+  /**
+   * スプレッドシートとシート名を指定して、ワークシートとデータ範囲を取得します。シートが存在しない場合は新規作成します。
+   *
+   * @param {Spreadsheet} spreadsheet スプレッドシートオブジェクト
+   * @param {string} sheetName シート名
+   * @return {Array<any>} [worksheet, range] ワークシート、データ範囲
+   */
   static getDataSheetRange(spreadsheet, sheetName){
     YKLiblog.Log.debug(`Util.getDataSheetRange sheetName=${sheetName}`)
     let worksheet = spreadsheet.getSheetByName(sheetName);
@@ -29,15 +45,35 @@ class Gssx {
     const range = Gssx.getMinimalContentRange(worksheet)
     return [worksheet, range]
   }
+
+  /**
+   * 指定された範囲からヘッダー行の範囲を取得します。
+   *
+   * @param {Range} range 対象の範囲
+   * @return {Range} ヘッダー行の範囲（1行目）
+   */
   static getHeaderRange(range){
     const shape = YKLiba.Range.getRangeShape(range)
     return range.offset(0,0, 1, shape.w)
   }
+
+  /**
+   * 指定された範囲からデータ行の範囲を取得します。
+   *
+   * @param {Range} range 対象の範囲
+   * @return {Range} データ行の範囲（2行目以降）
+   */
   static geDataRowsRange(range){
     const shape = YKLiba.Range.getRangeShape(range)
     return range.offset(1,0)
   }
 
+  /**
+   * ワークシートから値とデータ範囲を取得します。
+   *
+   * @param {Sheet} worksheet 対象のワークシート
+   * @return {Array<any>} [values, totalRange] 値の二次元配列、データ範囲
+   */
   static getValuesFromSheet(worksheet){
     // データ範囲を取得
     const totalRange = Gssx.getMinimalContentRange(worksheet);
@@ -48,9 +84,9 @@ class Gssx {
   }
 
   /**
-   * シートを指定して、ヘッダー行とデータ行を取得します。
+   * ワークシートを指定して、ヘッダー行とデータ行を取得します。
    *
-   * @param {string} sheetName シート名
+   * @param {Sheet} worksheet 対象のワークシート
    * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
    */
   static setupSpreadsheetForHeaderAndValues(worksheet){
@@ -60,6 +96,13 @@ class Gssx {
     return [header, values, totalRange];
   }
 
+  /**
+   * ワークシートの1列目のみを使用してヘッダーとデータを取得します。
+   *
+   * @param {Sheet} worksheet 対象のワークシート
+   * @param {Object} config 設定オブジェクト
+   * @return {Array<any>} ヘッダーとデータの情報
+   */
   static setupSpreadsheetAndHeaderAndDataOfCol1(worksheet, config){
     const totalRange = Gssx.getMinimalContentRange(worksheet);
     const totalVallues = totalRange.getValues()
@@ -71,20 +114,37 @@ class Gssx {
   }
 
   /**
-   * スプレッドシートとシートを指定して、ヘッダー行とデータ行を取得します。
+   * ワークシートと設定を指定して、ヘッダー行とデータ行を取得します。
    *
-   * @param {string} spreadsheetId スプレッドシートのID
-   * @param {string} sheetName シート名
-   * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+   * @param {Sheet} worksheet 対象のワークシート
+   * @param {Object} config 設定オブジェクト
+   * @return {Array<any>} ヘッダーとデータの情報
    */
   static setupSpreadsheetAndHeaderAndData(worksheet, config){
     const [values, totalRange] = Gssx.getValuesFromSheet(worksheet);
     return Gssx.getHeaderAndData(values, totalRange, config)
   }
+
+  /**
+   * ワークシートとYKLibb設定を指定して、ヘッダーとデータを取得します。
+   *
+   * @param {Sheet} worksheet 対象のワークシート
+   * @param {Object} yklibbconfig YKLibb設定オブジェクト
+   * @return {Array<any>} ヘッダーとデータの情報
+   */
   static getHeaderAndDataFromWorksheet(worksheet, yklibbconfig){
     const [values, totalRange] = Gssx.getValuesFromSheet(worksheet);
     return Gssx.getHeaderAndData(values, totalRange, yklibbconfig)
   }
+
+  /**
+   * 値、データ範囲、設定を指定して、ヘッダーとデータの情報を取得します。
+   *
+   * @param {Array<Array<any>>} values 値の二次元配列
+   * @param {Range} totalRange データ範囲
+   * @param {Object} config 設定オブジェクト
+   * @return {Array<any>} [header, values, headerRange, dataRowsRange, totalRange] ヘッダー、値、ヘッダー範囲、データ行範囲、全体範囲
+   */
   static getHeaderAndData(values, totalRange, config){
     let headerRange = null
     let dataRowsRange = null
@@ -207,6 +267,7 @@ class Gssx {
    * ワークシートのRangeの高さを、A列の連続した空白でないセルの並びの最大のものを含むように修正します。
    *
    * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet 修正対象のワークシート
+   * @return {Range} 修正された範囲
    */
   static adjustDataRangeHeight(sheet) {
     // A列のデータを取得
@@ -244,10 +305,10 @@ class Gssx {
   }
 
   /**
-   * ワークシートの上端、左端、下橋、右端から空白セルのみの連続した行、列を含まない、値セルをすべて含む長方形領域取得する。
+   * ワークシートの1列目の値と範囲を取得します。
    *
    * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet 取得元のワークシート
-   * @returns {Array} ワークシートの値の二次元配列
+   * @returns {Array} [values, col1Range, totalRange] 1列目の値、1列目の範囲、全体の範囲
    */
   static getValuesOfCol1FromSheet(worksheet){
     // データ範囲を取得
@@ -261,8 +322,9 @@ class Gssx {
 
   /**
    * 指定した名前のシートが存在しない場合、新しいシートを作成する。
-   * @param {Spreadsheet} Spreadsheet スプレッドシート
+   * @param {Spreadsheet} ss スプレッドシート
    * @param {string} sheetName シート名
+   * @return {Sheet} ワークシート
    */
   static getOrCreateWorksheet(ss, sheetName) {
     // 指定した名前のシートが存在するか確認
@@ -404,7 +466,7 @@ class Gssx {
   }
 
   /**
-   * 年で比較する関数
+   * 年で比較する関数（降順）
    * @param {object} a 比較対象のオブジェクト
    * @param {object} b 比較対象のオブジェクト
    * @returns {number} 比較結果
@@ -420,7 +482,7 @@ class Gssx {
   }
 
   /**
-   * 年で逆順に比較する関数
+   * 年で逆順に比較する関数（昇順）
    * @param {object} a 比較対象のオブジェクト
    * @param {object} b 比較対象のオブジェクト
    * @returns {number} 比較結果
@@ -435,6 +497,11 @@ class Gssx {
     return 0;
   }
 
+  /**
+   * 環境設定を使用してワークシートの内容をコピーする。
+   *
+   * @param {Object} env 環境設定オブジェクト
+   */
   static copyWorksheetContentX(env) {
     let destinationSpreadsheet = null;
     let destinationWorksheet = null;
@@ -444,6 +511,10 @@ class Gssx {
 
   /**
    * ワークシートの内容をコピーする。
+   *
+   * @param {string} destinationSpreadsheetId コピー先スプレッドシートID
+   * @param {string} sourceSpreadsheetId コピー元スプレッドシートID
+   * @param {string} sourceWorksheetName コピー元ワークシート名
    */
   static copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
     YKLiblog.Log.debug(`ワークシートの内容`);
@@ -486,6 +557,11 @@ class Gssx {
     }
   }
 
+  /**
+   * 環境設定を使用してワークシートの内容を表示する。
+   *
+   * @param {Object} env 環境設定オブジェクト
+   */
   static showWorksheetContentX(env) {
     let destinationSpreadsheet = null;
     let destinationWorksheet = null;
@@ -493,6 +569,13 @@ class Gssx {
     Gssx.showWorksheetContent(env.destinationSpreadsheetId, env.infoSpreadsheetId, env.infoWorksheetName)
   }
 
+  /**
+   * ワークシートの内容を表示する。
+   *
+   * @param {string} destinationSpreadsheetId 表示先スプレッドシートID
+   * @param {string} sourceSpreadsheetId 表示元スプレッドシートID
+   * @param {string} sourceWorksheetName 表示元ワークシート名
+   */
   static showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
     let prevNumRows;
     const sourceWorksheets = Gssx.getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
@@ -533,6 +616,15 @@ class Gssx {
     }
   }
 
+  /**
+   * 1つのワークシートの内容を表示する。
+   *
+   * @param {number} count ワークシートのカウント
+   * @param {Array} worksheets ワークシートの配列
+   * @param {GoogleAppsScript.Spreadsheet.Sheet} destinationWorksheet 表示先のワークシート
+   * @param {number} prevNumRows 前回の行数
+   * @returns {Array} 前回の行数と列数
+   */
   static showOneWorksheetContent(count, worksheets, destinationWorksheet, prevNumRows) {
     YKLiblog.Log.debug(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
 

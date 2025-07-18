@@ -24,7 +24,7 @@ function showUrl0(linkUrl){
 }
 
 /**
- * @description 指定された名前とURLを持つアイテムをXObjに追加し、zhome.htmlテンプレートを評価してHTML出力を返します。
+ * @description 指定された名前とURLを持つアイテムをXObjに追加し、HTML出力を返します。
  * @param {string} name アイテムの名前
  * @param {string} linkUrl リンク先のURL
  * @return {HtmlOutput} HTML出力
@@ -44,12 +44,17 @@ function showUrl(name, linkUrl){
 function getData() {
   return XObj;
 }
+
+/**
+ * @description テスト用の関数です。Google Appsファイルの取得または作成をテストします。
+ */
 function test_x(){
   getOrCreateGoogleAppsFileUnderFolderAndRet();
 }
+
 /**
- * @description 指定された種類のGoogle Appsファイルをしゅとくとくまたは作成し、指定された方法でレスポンスを返します。
- * @param {string} kind ファイルの種類 ("gss" または "docs
+ * @description 指定された種類のGoogle Appsファイルを取得または作成し、指定された方法でレスポンスを返します。
+ * @param {string} kind ファイルの種類 ("gss" または "docs")
  * @param {string} rettype レスポンスの種類 ("redirect" または "showUrl")
  * @param {string} folderId ファイルを作成するフォルダのID
  * @param {string} fileName ファイル名
@@ -112,7 +117,7 @@ function createGoogleAppsFileUnderFolderAndRet(kind="gss", rettype = "redirect",
 }
 
 /**
- * 指定フォルダ直下の指定名のスプレッドシートを取得する
+ * @description 指定フォルダ直下の指定名のスプレッドシートを取得する
  * @param {Folder} folder フォルダ
  * @param {string} spreadsheetName スプレッドシート名
  * @return {Spreadsheet} スプレッドシートオブジェクト（見つからない場合はnull）
@@ -129,7 +134,7 @@ function getSpreadsheetUnderFolderByName(folder, spreadsheetName) {
 }
 
 /**
- * 指定フォルダ直下の指定名のGoogle Docsファイルを取得する
+ * @description 指定フォルダ直下の指定名のGoogle Docsファイルを取得する
  * @param {Folder} folder フォルダ
  * @param {string} docName Google Docsファイル名
  * @return {File} Google Docsファイルオブジェクト（見つからない場合はnull）
@@ -146,7 +151,7 @@ function getGoogleDocUnderFolderByName(folder, docName) {
 }
 
 /**
- * 指定フォルダ直下の指定名のGoogle Docsファイルを取得、もしくは作成する
+ * @description 指定フォルダ直下の指定名のGoogle Docsファイルを取得、もしくは作成する
  * @param {Folder} folder フォルダ
  * @param {string} docName Google Docsファイル名
  * @return {File} Google Docsファイルオブジェクト
@@ -188,6 +193,7 @@ function getOrCreateSpreadsheetUnderFolder(folderId = null, fileName = "Untitled
 
 /**
  * @description 指定されたディレクトリにGoogle Docsを作成します。
+ * @param {string} folderId 指定ディレクトリId (デフォルト: null)
  * @param {string} fileName 作成するGoogle Docsのファイル名 (デフォルト: "Untitled")
  * @return {string} 新しく作成されたGoogle DocsへのURL
  * @customfunction
@@ -217,9 +223,9 @@ function getOrCreateGoogleDocsUnderFolder(folderId = null, fileName = "Untitled"
 }
 
 /**
- * @description 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします。
+ * @description 指定されたURLにリダイレクトするHTMLレスポンスを返します。
  * @param {string} url リダイレクト先URL
- * @return {HtmlOutput} 新しく作成されたGoogle Docsへのリダイレクト
+ * @return {HtmlOutput} リダイレクト用のHTMLレスポンス
  * @customfunction
  */
 function redirectToUrl(url){
@@ -230,10 +236,11 @@ function redirectToUrl(url){
   return HtmlService.createHtmlOutput(html)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
+
 /**
- * @description 指定ファイルをるーとふぉるだから指定ディレクトリに移動します。
-るーとふぉるだから
- * @param {file} 移動させたいfile
+ * @description 指定ファイルをルートフォルダから指定ディレクトリに移動します。
+ * @param {Folder} folder 移動先フォルダ
+ * @param {File} file 移動させたいファイル
  * @customfunction
  */
 function moveFileFromRootFolderToFolder(folder, file){
@@ -249,8 +256,8 @@ function moveFileFromRootFolderToFolder(folder, file){
  * @description 指定ファイルを指定ディレクトリに移動します。
  * @param {string} folderId 移動先フォルダID
  * @param {string} defaultFolderName 移動先デフォルトフォルダ名
- * @param {file} 移動させたいfile
- * @return {HtmlOutput} 新しく作成されたGoogle Docsへのリダイレクト
+ * @param {File} file 移動させたいファイル
+ * @return {HtmlOutput} 移動結果のHTMLレスポンス
  * @customfunction
  */
 function moveFileToTargetFolder(folderId, defaultFolderName, file){
@@ -264,7 +271,7 @@ function moveFileToTargetFolder(folderId, defaultFolderName, file){
 /**
  * @description 指定フォルダを取得またはルートフォルダを取得します
  * @param {string} folderId 取得したいフォルダのフォルダID(nullまたは"root"または/が指定された場合、ルートフォルダを取得する)
- * @return {folder} 取得したフォルダまたはルートフォルダ（folderIdで指定されたフォルダが取得して出来ない場合）
+ * @return {Folder} 取得したフォルダまたはルートフォルダ（folderIdで指定されたフォルダが取得できない場合）
  * @customfunction
  */
 function getFolderOrRootFolder(folderId) {
@@ -288,6 +295,11 @@ function getFolderOrRootFolder(folderId) {
   return folder;
 }
 
+/**
+ * @description パス配列に基づいてフォルダを取得または作成します。
+ * @param {string[]} pathArray フォルダパスの配列
+ * @return {Folder} 取得または作成されたフォルダ
+ */
 function getFolderByPath(pathArray){
   rootFolder = DriveApp.getRootFolder();
   parentFolder = rootFolder;
@@ -320,6 +332,12 @@ function getFolderByPath(pathArray){
   return folder;
 }
 
+/**
+ * @description 指定フォルダ内の指定ファイルを取得または作成します。
+ * @param {string} targetFolderId 対象フォルダID
+ * @param {string} targetFileName 対象ファイル名
+ * @return {File} 取得または作成されたファイル
+ */
 function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
   try{
     //const folder = DriveApp.getFolderById(targetFolderId);
@@ -344,6 +362,13 @@ function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
   return file;
 }
 
+/**
+ * @description ドキュメントフォルダ内の指定フォルダを取得または作成します。
+ * @param {object} folderInfo フォルダ情報オブジェクト
+ * @param {string} targetFolderId 対象フォルダID
+ * @param {string} targetFolderName 対象フォルダ名
+ * @return {Folder} 取得または作成されたフォルダ
+ */
 function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFolderName){
   // const parentFolderId = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_ID');
   // const parentFolderPath = PropertiesService.getScriptProperties().getProperty('DOC_PARENT_FOLDER_PATH');
@@ -415,8 +440,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
 }
 
 /**
- * Googleドライブ内の内容が空のGoogleドキュメントファイルのファイルIDを配列として取得する
- *
+ * @description Googleドライブ内の内容が空のGoogleドキュメントファイルのファイルIDを配列として取得する
  * @return {string[]} 内容が空のGoogleドキュメントファイルのファイルIDの配列
  */
 function getEmptyDocsFileIds() {
@@ -447,7 +471,10 @@ function getEmptyDocsFileIds() {
   return emptyFileIds;
 }
 
-
+/**
+ * @description 指定フォルダ内のGoogleドキュメントファイルをページネーションで検索します。
+ * @param {string} folderId 検索対象のフォルダID
+ */
 function searchFilesWithPagination(folderId) {
   // var folderId = 'YOUR_FOLDER_ID'; // 検索対象のフォルダID
   var query = 'folderId in "' + folderId + '" and mimeType = "application/vnd.google-apps.document"'; // 検索条件
@@ -491,6 +518,10 @@ function searchFilesWithPagination(folderId) {
   }
 }
 
+/**
+ * @description ルートフォルダ直下のフォルダIDの配列を取得します。
+ * @return {string[]} ルートフォルダ直下のフォルダIDの配列
+ */
 function getRootFolderChildrenIds() {
   // ルートフォルダを取得
   const rootFolder = DriveApp.getRootFolder();
@@ -507,6 +538,11 @@ function getRootFolderChildrenIds() {
   return folderIds;
 }
 
+/**
+ * @description サブフォルダを取得します。
+ * @param {FolderIterator} folders フォルダイテレータ
+ * @return {Array} サブフォルダの配列
+ */
 function getSubFolders(folders){
   if (!folders.hasNext()) {
       if (folders.hasNext()) {
@@ -515,6 +551,11 @@ function getSubFolders(folders){
       }
   }
 }
+
+/**
+ * @description Computersフォルダ直下のフォルダIDを取得します（非再帰版）。
+ * @return {Array} フォルダ名とフォルダIDの配列の配列
+ */
 function getFolderIdsUnderComputersx() {
   // "Computers" のルートフォルダを取得
   let folderIdByName = { 
@@ -539,6 +580,10 @@ function getFolderIdsUnderComputersx() {
   return folderIdArray
 }
 
+/**
+ * @description Computersフォルダ直下のフォルダIDを再帰的に取得します。
+ * @return {Array} フォルダIDの配列の配列
+ */
 function getFolderIdsUnderComputers() {
   // "Computers" のルートフォルダを取得
   let folderIdByName = { 

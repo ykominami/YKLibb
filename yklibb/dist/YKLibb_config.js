@@ -1,4 +1,15 @@
+/**
+ * 設定クラス
+ * 幅、ヘッダー、処理方法を管理する
+ */
 class Config {
+  /**
+   * コンストラクタ
+   * @param {number} width - 設定の幅
+   * @param {Array} header - ヘッダー配列
+   * @param {string} way - 処理方法
+   * @throws {Error} ヘッダー幅が0の場合にエラーを投げる
+   */
   constructor(width, header, way){
     this.width = width
     this.header = header
@@ -9,15 +20,33 @@ class Config {
 
     this.way = way
   }
+  /**
+   * 幅を取得する
+   * @returns {number} 設定の幅
+   */
   getWidth(){
     return this.width
   }
+  /**
+   * ヘッダーを取得する
+   * @returns {Array} ヘッダー配列
+   */
   getHeader(){
     return this.header
   }
+  /**
+   * ヘッダー幅を取得する
+   * @returns {number} ヘッダー配列の長さ
+   */
   getHeaderWidth(){
     return this.headerWidth
   }
+  /**
+   * 設定を変換する
+   * @param {number} col - 開始列インデックス
+   * @param {number} width - 新しい幅
+   * @returns {Config} 変換された設定オブジェクト
+   */
   transform(col, width){
     let newConfig = this
     let newHeader = this.header
@@ -33,9 +62,17 @@ class Config {
     }
     return newConfig
   }
+  /**
+   * 部分処理方式を取得する
+   * @returns {string} 'PARTIAL'文字列
+   */
   static PARTIAL(){
     return 'PARTIAL'
   }
+  /**
+   * 完全処理方式を取得する
+   * @returns {string} 'COMPLETE'文字列
+   */
   static COMPLETE(){
     return 'COMPLETE'
   }

@@ -1,4 +1,9 @@
 class Util {
+  /**
+   * 日付文字列またはDateオブジェクトから有効な日付情報を取得する
+   * @param {string|Date} srcDateTime - ソースとなる日付文字列またはDateオブジェクト
+   * @returns {Array} [date, dateTime, dateStr] - Dateオブジェクト、タイムスタンプ、フォーマット済み文字列の配列
+   */
   static getValidDateAndDateTime(srcDateTime){
     YKLiblog.Log.debug(`getValidDateAndDateTime srcDateTime=${srcDateTime}`)
     let date = new Date(srcDateTime)
@@ -14,6 +19,12 @@ class Util {
     YKLiblog.Log.debug(`dateTime=${dateTime}`)
     return [date, dateTime, dateStr]
   }
+  
+  /**
+   * Dateオブジェクトを指定されたフォーマットの文字列に変換する
+   * @param {Date} dateTime - 変換対象のDateオブジェクト
+   * @returns {string} フォーマット済みの日時文字列（yyyy-MM-dd HH:mm:ss）
+   */
   static dateTimeToString(dateTime){
     YKLiblog.Log.debug(`dateTimeToString dateTime=${dateTime}`)
     const timeZone = "Asia/Tokyo";
@@ -21,11 +32,12 @@ class Util {
     const formattedString1 = Utilities.formatDate(dateTime, timeZone, format1);
     return formattedString1
   }
+  
   /**
    * Setと配列の差分を取得する
-   * @param {Set} setObj - 比較元のSet
+   * @param {Set} done - 比較元のSet
    * @param {Array} arrayObj - 比較対象の配列
-   * @returns {{setOnly: Array, arrayOnly: Array, symmetric: Array}} 3種類の差分を含むオブジェクト
+   * @returns {Array} [setOnly, arrayOnly, symmetric] - Setのみに存在、配列のみに存在、対称差の配列
    */
   static calculateSetAndArrayDifference(done, arrayObj) {
     const x2 = [...arrayObj]
@@ -45,15 +57,39 @@ class Util {
     return [setOnly, arrayOnly, symmetric,];
   }
 
+  /**
+   * 文字列が空白文字のみで構成されているかを判定する
+   * @param {string} str - 判定対象の文字列
+   * @returns {boolean} 空白文字のみの場合はtrue、そうでない場合はfalse
+   */
   static isWhiteSpaceString(str){
     return (typeof(str) === "string" && str.trim() === '')
   }
+  
+  /**
+   * 文字列が有効な値（空でない）かを判定する
+   * @param {string} str - 判定対象の文字列
+   * @returns {boolean} 有効な文字列の場合はtrue、そうでない場合はfalse
+   */
   static isValidString(str){
     return (typeof(str) === "string" && str.trim() !== '')
   }
+  
+  /**
+   * セルの値が空白かどうかを判定する
+   * @param {Array} value - 判定対象のセル値の配列
+   * @returns {boolean} 空白セルの場合はtrue、そうでない場合はfalse
+   */
   static isBlankCell(value){
     return (value.length == 1 && value[0] === '')
   }
+  
+  /**
+   * ヘッダーと値の配列から連想配列の配列を作成する
+   * @param {Array} headers - ヘッダー名の配列
+   * @param {Array} values - 値の配列の配列
+   * @returns {Array} 連想配列の配列
+   */
   static makeAssocArray(headers, values){
     const array = []
     for(let h=0; h<values.length; h++){
@@ -64,6 +100,13 @@ class Util {
     YKLiblog.Log.debug( array )
     return array
   }
+  
+  /**
+   * ヘッダーと値の配列から単一の連想配列を作成する
+   * @param {Array} headers - ヘッダー名の配列
+   * @param {Array} value - 値の配列
+   * @returns {Object} 連想配列
+   */
   static makeAssoc(headers, value){
     const assoc = {}
     for(let i=0; i<headers.length; i++){
@@ -72,6 +115,13 @@ class Util {
     }
     return assoc
   }
+  
+  /**
+   * スプレッドシートの範囲が有効なヘッダーとデータ行を持っているかを判定する
+   * @param {Range} range - 判定対象のスプレッドシート範囲
+   * @param {Object} config - 設定オブジェクト
+   * @returns {Array} [result, validHeader, validDataRows] - 全体の有効性、ヘッダーの有効性、データ行の有効性
+   */
   static hasValidDataHeaderAndDataRows(range, config){
     let dataValues
     const values = range.getValues()
@@ -104,6 +154,7 @@ class Util {
     const result = validHeader && validDataRows 
     return [result, validHeader, validDataRows ]
   }
+  
   /**
    * 2つの配列が要素の順序と要素の値がすべて一致するかを判定します。
    * プリミティブ値（文字列、数値、ブール値）の配列に最適です。
@@ -130,6 +181,13 @@ class Util {
     // すべてのチェックを通過すれば一致する
     return true;
   }
+  
+  /**
+   * ソース配列がターゲット配列の先頭部分と一致するかを判定する
+   * @param {Array} sourceArray - 比較元の配列
+   * @param {Array} targetArray - 比較対象の配列
+   * @returns {boolean} ソース配列がターゲット配列の先頭部分と一致する場合はtrue、そうでない場合はfalse
+   */
   static isPartialArray(sourceArray, targetArray){
     const sourceLength = sourceArray.length
     const targetLength = targetArray.length
@@ -143,6 +201,13 @@ class Util {
     }
     return true
   }
+  
+  /**
+   * ヘッダーが無効かどうかを判定する
+   * @param {Array} value - 判定対象のヘッダー配列
+   * @param {Object} config - 設定オブジェクト
+   * @returns {boolean} ヘッダーが無効な場合はtrue、有効な場合はfalse
+   */
   static hasInvalidHeader(value, config){
     if( Util.isBlankCell(value) ){
       YKLiblog.Log.debug(`Util.hasInvalidHeader 1 true`)
@@ -170,6 +235,12 @@ class Util {
     }
   }
 
+  /**
+   * データ行が無効かどうかを判定する
+   * @param {Array} values - 判定対象のデータ行の配列
+   * @param {Object} config - 設定オブジェクト
+   * @returns {boolean} 無効なデータ行が含まれている場合はtrue、すべて有効な場合はfalse
+   */
   static hasInvalidDataRows(values, config){
     const invalid = values.some( item => {
       const ret = item.length !== config.getWidth()
@@ -181,6 +252,12 @@ class Util {
 }
 this.Util=Util
 
+/**
+ * スプレッドシートの設定とヘッダー・データを取得するテスト関数
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
+ */
 function test_has_re(sheetId, sheetName){
   const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(sheetId, sheetName)
   // const tableDef = this.getTargetedEmailIdsConfigTableDef()
@@ -192,6 +269,12 @@ function test_has_re(sheetId, sheetName){
   return [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
 }
 
+/**
+ * スプレッドシートの設定とヘッダー・データを取得するテスト関数（COMPLETE設定）
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
+ */
 function test_has_t(sheetId, sheetName){
   const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(sheetId, sheetName)
   const headerIdx = "id"
@@ -202,12 +285,21 @@ function test_has_t(sheetId, sheetName){
   return [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
 }
 
+/**
+ * スプレッドシートの値のみを取得するテスト関数
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, values, totalRange]
+ */
 function test_has_info(sheetId, sheetName){
   const [spreadsheet, worksheet, values, totalRange] = Gssx.setupSpeadsheetValues(sheetId, sheetName)
   YKLiblog.Log.debug(`values=${values}`)
   return [spreadsheet, worksheet, values, totalRange]
 }
 
+/**
+ * ログデバッグを初期化してスプレッドシートの値を取得するテスト関数
+ */
 function test_has_tc(){
   YKLiblog.Log.initLogDebug()
   const sheetId = "1KtGdnnpj8k_bkxfYITalK193nRlVXiN0o_YiASO5KNs"
@@ -215,6 +307,10 @@ function test_has_tc(){
   const [spreadsheet, worksheet, values, totalRange] = test_has_info(sheetId, sheetName)
   // YKLiblog.Log.debug(`values=${values}`)
 }
+
+/**
+ * 複数のシートでテストを実行する関数
+ */
 function test_has(){
   YKLiblog.Log.initLogDebug()
   const sheetId = "1Mz4pqoclYFPSmbNlpf_g18CUNTcxt68KkKFVTNEJGg4"
