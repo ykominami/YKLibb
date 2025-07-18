@@ -9,6 +9,12 @@ function setupSpreadsheet(spreadsheetId, sheetName){
   const [spreadsheet, worksheet] = setupForSpreadsheet(spreadsheetId, sheetName);
   return setupSpreadsheetX(worksheet);
 }
+/**
+ * ワークシートからヘッダー行とデータ行を取得します。
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet 取得元のワークシート
+ * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+ */
 function setupSpreadsheetX(worksheet){
   const [values, dataRange] = getValuesFromSheet(worksheet); 
   const header =  values.shift();
@@ -261,6 +267,15 @@ function compareByYearReverse(a, b) {
   return 0;
 }
 
+/**
+ * 環境変数からパラメータを取得してワークシートの内容をコピーします。
+ *
+ * @param {object} env 環境変数オブジェクト
+ * @param {string} env.destinationSpreadsheetId コピー先スプレッドシートID
+ * @param {string} env.sourceSpreadsheetId コピー元スプレッドシートID
+ * @param {string} env.sourceWorksheetName コピー元ワークシート名
+ * @return {void}
+ */
 function copyWorksheetContentX(env) {
   const destinationSpreadsheetId = env.get("destinationSpreadsheetId");
   const sourceSpreadsheetId = env.get("sourceSpreadsheetId");
@@ -304,6 +319,15 @@ function copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sou
   }
 }
 
+/**
+ * 環境変数からパラメータを取得してワークシートの内容を表示します。
+ *
+ * @param {object} env 環境変数オブジェクト
+ * @param {string} env.destinationSpreadsheetId 表示先スプレッドシートID
+ * @param {string} env.sourceSpreadsheetId 表示元スプレッドシートID
+ * @param {string} env.sourceWorksheetName 表示元ワークシート名
+ * @return {void}
+ */
 function showWorksheetContentX(env) {
   const destinationSpreadsheetId = env.get("destinationSpreadsheetId");
   const sourceSpreadsheetId = env.get("sourceSpreadsheetId");
@@ -342,6 +366,15 @@ function showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sou
   }
 }
 
+/**
+ * 1つのワークシートの内容を表示用にコピーします。
+ *
+ * @param {number} count ワークシートのカウント
+ * @param {Array} worksheets ワークシートの配列
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} destinationWorksheet コピー先のワークシート
+ * @param {number} prevNumRows 前回の行数
+ * @returns {Array} 前回の行数と列数
+ */
 function showOneWorksheetContent(count, worksheets, destinationWorksheet, prevNumRows) {
   // YKLiblog.Log.debug(`#################### A count=<span class="math-inline">\{count\} prevNumRows\=</span>{prevNumRows}`);
 

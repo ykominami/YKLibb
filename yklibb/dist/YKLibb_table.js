@@ -1,11 +1,15 @@
 /**
  * @class Table
  * @description テーブルデータを管理するクラスです。
- * @param {Array<string>} header テーブルのヘッダー行の配列
- * @param {Array<Array<any>>} values テーブルのデータ行の二次元配列
- * @param {Range} dataRange テーブルのデータ行の二次元配列
  */
 class Table {
+  /**
+   * @constructor
+   * @description テーブルオブジェクトを初期化します。
+   * @param {Array<string>} header テーブルのヘッダー行の配列
+   * @param {Array<Array<any>>} values テーブルのデータ行の二次元配列
+   * @param {Range} dataRange テーブルのデータ行の二次元配列
+   */
   constructor(header, values, dataRange) {
     /**
      * @property {Array<string>} header テーブルのヘッダー行
@@ -23,21 +27,51 @@ class Table {
     this.dataRange = dataRange;
   }
 
+  /**
+   * @method getRow
+   * @description 指定したインデックスのデータ行を取得します。
+   * @param {number} index 取得する行のインデックス
+   * @returns {Array<any>} 指定したインデックスのデータ行
+   */
   getRow(index){
     return this.values[index];
   }
+
+  /**
+   * @method getCol
+   * @description 指定した行から指定した列名の値を取得します。
+   * @param {Array<any>} row データ行
+   * @param {string} name 列名
+   * @returns {any} 指定した列の値
+   */
   getCol(row, name){
     return row[ this.header_index[name] ];
   }
+
+  /**
+   * @method setColValue
+   * @description 指定した行の指定した列名の値を設定します。
+   * @param {Array<any>} row データ行
+   * @param {string} name 列名
+   * @param {any} value 設定する値
+   */
   setColValue(row, name, value){
     row[ this.header_index[name] ] = value;
   }
+
+  /**
+   * @method setRow
+   * @description 指定したインデックスのデータ行を設定します。
+   * @param {number} index 設定する行のインデックス
+   * @param {Array<any>} row 設定するデータ行
+   */
   setRow(index, row){
     this.values[index] = row;
   }
+
   /**
-   * @method getHeader
-   * @description isbn列を修正する。
+   * @method reformIsbn
+   * @description ISBN列を修正します。形態が'本'の場合、ISBNの前後の空白を削除し、978-プレフィックスを978に変更します。
    */
   reformIsbn(){
     for(let i=0; i<this.values.length; i++){
@@ -55,6 +89,11 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method reformIsbn2
+   * @description ISBN列を修正します。長さが15文字のISBNの空白を削除し、978-プレフィックスを978に変更します。
+   */
   reformIsbn2(){
     for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -72,6 +111,11 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method reformIsbn3
+   * @description ISBN列を修正します。長さが10文字のISBNの空白を削除し、978-プレフィックスを978に変更します。
+   */
   reformIsbn3(){
     for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -89,9 +133,16 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method storeTable
+   * @description テーブルデータをスプレッドシートの範囲に保存します。
+   * @param {Array<Array<any>>} array 保存するデータの二次元配列
+   */
   storeTable(array){
     this.dataRange.setValues(array);
   }
+
   /**
    * @method getHeader
    * @description ヘッダー行を取得します。
@@ -108,16 +159,6 @@ class Table {
    */
   getValues() {
     return this.values;
-  }
-
-  /**
-   * @method getRow
-   * @description 指定したインデックスのデータ行を取得します。
-   * @param {number} index 取得する行のインデックス
-   * @returns {Array<any>} 指定したインデックスのデータ行
-   */
-  getRow(index) {
-    return this.values[index];
   }
 
   /**
@@ -148,6 +189,11 @@ class Table {
   addColumn(value) {
     this.values.forEach(row => row.push(value));
   }
+
+  /**
+   * @method showB
+   * @description デバッグ用：各データ行のshapeとasinの値をログに出力します。
+   */
   showB(){
      for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -156,6 +202,11 @@ class Table {
       YKLiblog.Log.debug(`shape=${shape} asin=${asin}`);
     }
   }
+
+  /**
+   * @method showB4
+   * @description デバッグ用：ISBNの長さと形態に基づいてデータを分類し、ログに出力します。
+   */
   showB4(){
      for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -218,6 +269,10 @@ class Table {
     }
   }
 
+  /**
+   * @method show
+   * @description デバッグ用：状態が'読了'のデータの形態とISBNをログに出力します。
+   */
   show(){
      for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -228,6 +283,11 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method show2
+   * @description デバッグ用：状態、形態、ISBNの各値の種類をログに出力します。
+   */
   show2(){
     let status_asoc = {};
     let shape_asoc = {};
@@ -243,6 +303,11 @@ class Table {
     YKLiblog.Log.info(`shape =${ Object.keys(shape_asoc)}` );
     YKLiblog.Log.info(`isbn  =${ Object.keys(isbn_asoc)}` );
   }
+
+  /**
+   * @method show3
+   * @description デバッグ用：読了、速読、図-読了の状態と形態の組み合わせ、およびISBNの分布をログに出力します。
+   */
   show3(){
     let status_asoc = {};
     let isbn_asoc = {};
@@ -280,6 +345,11 @@ class Table {
       } );
     } );
   }
+
+  /**
+   * @method show4
+   * @description デバッグ用：ISBNの長さと形態の組み合わせをログに出力します。
+   */
   show4(){
      for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);
@@ -341,6 +411,11 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method reformIsbn4
+   * @description ISBN列を修正します。長さが13文字または14文字のISBNを数値に変換します。
+   */
   reformIsbn4(){
     let num;
     for(let i=0; i<this.values.length; i++){
@@ -356,6 +431,11 @@ class Table {
       }
     }
   }
+
+  /**
+   * @method show6
+   * @description デバッグ用：状態が'読了'のデータのISBNをログに出力します。
+   */
   show6(){
     for(let i=0; i<this.values.length; i++){
       const row = this.getRow(i);

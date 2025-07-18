@@ -1,7 +1,11 @@
+/**
+ * Google Apps Script用のユーティリティクラス
+ * Google Drive、Google Docs、Google Sheetsの操作を提供する
+ */
 class Gapps {
 
   /**
-   * @description 指定された名前とURLを持つアイテムをXObjオブジェクトに追加します。
+   * 指定された名前とURLを持つアイテムをXObjオブジェクトに追加する
    * @param {string} name アイテムの名前
    * @param {string} url アイテムのURL
    */
@@ -12,7 +16,7 @@ class Gapps {
   }
 
   /**
-   * @description リンクを含むHTMLレスポンスを返します。
+   * リンクを含むHTMLレスポンスを返す
    * @param {string} linkUrl リンク先のURL
    * @return {HtmlOutput} HTMLレスポンス
    */
@@ -24,7 +28,7 @@ class Gapps {
   }
 
   /**
-   * @description 指定された名前とURLを持つアイテムをXObjに追加し、zhome.htmlテンプレートを評価してHTML出力を返します。
+   * 指定された名前とURLを持つアイテムをXObjに追加し、HTML出力を返す
    * @param {string} name アイテムの名前
    * @param {string} linkUrl リンク先のURL
    * @return {HtmlOutput} HTML出力
@@ -38,20 +42,23 @@ class Gapps {
   }
 
   /**
-   * @description XObjオブジェクトを返します。
+   * XObjオブジェクトを返す
    * @return {object} XObjオブジェクト
    */
   static getData() {
     return Gapps.XObj;
   }
 
+  /**
+   * テスト用メソッド
+   */
   static test_x(){
     Gapps.getOrCreateGoogleAppsFileUnderFolderAndRet();
   }
 
   /**
-   * @description 指定された種類のGoogle Appsファイルをしゅとくとくまたは作成し、指定された方法でレスポンスを返します。
-   * @param {string} kind ファイルの種類 ("gss" または "docs
+   * 指定された種類のGoogle Appsファイルを取得または作成し、指定された方法でレスポンスを返す
+   * @param {string} kind ファイルの種類 ("gss" または "docs")
    * @param {string} rettype レスポンスの種類 ("redirect" または "showUrl")
    * @param {string} folderId ファイルを作成するフォルダのID
    * @param {string} fileName ファイル名
@@ -82,7 +89,7 @@ class Gapps {
   }
 
   /**
-   * @description 指定された種類のGoogle Appsファイルを作成し、指定された方法でレスポンスを返します。
+   * 指定された種類のGoogle Appsファイルを作成し、指定された方法でレスポンスを返す
    * @param {string} kind ファイルの種類 ("gss" または "docs")
    * @param {string} rettype レスポンスの種類 ("redirect" または "showUrl")
    * @param {string} folderId ファイルを作成するフォルダのID
@@ -147,6 +154,12 @@ class Gapps {
     return null;
   }
 
+  /**
+   * 指定フォルダ直下のスプレッドシートを取得または作成する
+   * @param {string} folderId フォルダID
+   * @param {string} fileName ファイル名
+   * @return {Spreadsheet} スプレッドシートオブジェクト
+   */
   static getOrCreateSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
     const folder = Gapps.getFolderOrRootFolder(folderId)
     let spreadsheet = Gapps.getSpreadsheetUnderFolderByName(folder, fileName)
@@ -165,7 +178,7 @@ class Gapps {
   }
 
   /**
-   * @description 指定されたディレクトリの直下に指定名のGoogle Spreadsheetを作成し、それへのURLを返す
+   * 指定されたディレクトリの直下に指定名のGoogle Spreadsheetを作成し、それへのURLを返す
    * @param {string} folderId 指定ディレクトリId (デフォルト: null)
    * @param {string} fileName 作成するGoogle Spreadsheetのファイル名 (デフォルト: "Untitled")
    * @return {string} 新しく作成されたGoogle SpreadsheetへのURL
@@ -180,6 +193,12 @@ class Gapps {
     return spreadsheetUrl;
   }
 
+  /**
+   * 指定フォルダ直下のGoogle Docsを取得または作成する
+   * @param {string} folderId フォルダID
+   * @param {string} fileName ファイル名
+   * @return {Document} Google Docsオブジェクト
+   */
   static getOrCreateGoogleDocsUnderFolder(folderId = null, fileName = "Untitled") {
     // プロジェクトのプロパティからデフォルトのフォルダIDを取得
     const folder = Gapps.getFolderOrRootFolder(folderId)
@@ -191,7 +210,7 @@ class Gapps {
     return document;
   }
   /**
-   * @description 指定されたディレクトリにGoogle Docsを作成します。
+   * 指定されたディレクトリにGoogle Docsを作成します
    * @param {string} fileName 作成するGoogle Docsのファイル名 (デフォルト: "Untitled")
    * @return {string} 新しく作成されたGoogle DocsへのURL
    * @customfunction
@@ -208,6 +227,11 @@ class Gapps {
     const url = urlHeadPart + id;
     return url;
   }
+  /**
+   * Google Docsにテキストを書き込む
+   * @param {Document} doc Google Docsオブジェクト
+   * @param {string} text 書き込むテキスト
+   */
   static writeToGoogleDocs(doc, text){
     try{
       YKLiblog.Log.debug(`3 doc.constructor=${doc.constructor}`)
@@ -224,6 +248,11 @@ class Gapps {
       YKLiblog.Log.debug(`3 e.stack=${e.stack}` )
     }
   }  
+  /**
+   * 指定されたIDのGoogle Docsにテキストを書き込む
+   * @param {string} documentId ドキュメントID
+   * @param {string} text 書き込むテキスト
+   */
   static writeToGoogleDocsById(documentId, text){
     // 1. IDを使ってドキュメントを開く
     try{
@@ -245,7 +274,7 @@ class Gapps {
   }
 
   /**
-   * @description 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします。
+   * 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします
    * @param {string} url リダイレクト先URL
    * @return {HtmlOutput} 新しく作成されたGoogle Docsへのリダイレクト
    * @customfunction
@@ -260,9 +289,9 @@ class Gapps {
   }
 
   /**
-   * @description 指定ファイルをるーとふぉるだから指定ディレクトリに移動します。
-  るーとふぉるだから
-   * @param {file} 移動させたいfile
+   * 指定ファイルをルートフォルダから指定ディレクトリに移動します
+   * @param {Folder} folder 移動先フォルダ
+   * @param {File} file 移動させたいファイル
    * @customfunction
    */
   static moveFileFromRootFolderToFolder(folder, file){
@@ -275,10 +304,10 @@ class Gapps {
   }
 
   /**
-   * @description 指定ファイルを指定ディレクトリに移動します。
+   * 指定ファイルを指定ディレクトリに移動します
    * @param {string} folderId 移動先フォルダID
    * @param {string} defaultFolderName 移動先デフォルトフォルダ名
-   * @param {file} 移動させたいfile
+   * @param {File} file 移動させたいファイル
    * @return {HtmlOutput} 新しく作成されたGoogle Docsへのリダイレクト
    * @customfunction
    */
@@ -291,9 +320,9 @@ class Gapps {
   }
 
   /**
-   * @description 指定フォルダを取得またはルートフォルダを取得します
+   * 指定フォルダを取得またはルートフォルダを取得します
    * @param {string} folderId 取得したいフォルダのフォルダID(nullまたは"root"または/が指定された場合、ルートフォルダを取得する)
-   * @return {folder} 取得したフォルダまたはルートフォルダ（folderIdで指定されたフォルダが取得して出来ない場合）
+   * @return {Folder} 取得したフォルダまたはルートフォルダ（folderIdで指定されたフォルダが取得して出来ない場合）
    * @customfunction
    */
   static getFolderOrRootFolder(folderId) {
@@ -311,6 +340,13 @@ class Gapps {
     }
     return folder;
   }
+
+  /**
+   * フォルダIDまたはパスからフォルダを取得または作成する
+   * @param {string} folderId フォルダID
+   * @param {string} path フォルダパス
+   * @return {Folder} フォルダオブジェクト
+   */
   static getOrCreateFolder(folderId, path){
     let foder
     if( folderId ){
@@ -328,11 +364,23 @@ class Gapps {
     }
     return folder
   }
+
+  /**
+   * パス文字列からフォルダを取得または作成する
+   * @param {string} path パス文字列（>で区切られた）
+   * @return {Folder} フォルダオブジェクト
+   */
   static getOrCreateFolderByPathString(path){
     const pathArray = path.split('>')
     const folder =  Gapps.getOrCreateFolderByPath(pathArray)
     return folder
   }
+
+  /**
+   * パス配列からフォルダを取得または作成する
+   * @param {string[]} pathArray パス配列
+   * @return {Folder} フォルダオブジェクト
+   */
   static getOrCreateFolderByPath(pathArray){
     let folder = null;
     let folders;
@@ -367,10 +415,8 @@ class Gapps {
   }
 
   /**
-   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、
-   * 存在すればそのフォルダIDを、存在しなければ新規作成してそのフォルダIDを返します。
-   *
-   * @param {object} parentFolder 親フォルダ
+   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、存在すればそのフォルダIDを、存在しなければ新規作成してそのフォルダIDを返します
+   * @param {Folder} parentFolder 親フォルダ
    * @param {string} folderName 検索または作成するフォルダ名
    * @returns {string} 見つかった、または新規作成されたフォルダのID
    */
@@ -399,12 +445,10 @@ class Gapps {
   }
 
   /**
-   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、
-   * 存在すればそのフォルダを、存在しなければ新規作成してそのフォルダを返します。
-   *
-   * @param {object} parentFolder 親フォルダ
+   * 親フォルダの直下に指定したフォルダ名が存在するかを確認し、存在すればそのフォルダを、存在しなければ新規作成してそのフォルダを返します
+   * @param {Folder} parentFolder 親フォルダ
    * @param {string} folderName 検索または作成するフォルダ名
-   * @returns {object} 見つかった、または新規作成されたフォルダ
+   * @returns {Folder} 見つかった、または新規作成されたフォルダ
    */
   static getOrCreateFolder(parentFolder, folderName) {
     let folder = null
@@ -431,6 +475,12 @@ class Gapps {
     }
   }
 
+  /**
+   * 指定フォルダ直下のファイルを取得または作成する
+   * @param {Folder} targetFolder 対象フォルダ
+   * @param {string} targetFileName 対象ファイル名
+   * @return {File} ファイルオブジェクト
+   */
   static getOrCreateFileUnderFolder(targetFolder, targetFileName){
     let file = null
     try{
@@ -458,6 +508,12 @@ class Gapps {
 
     return file;
   }
+  /**
+   * 指定フォルダID直下のファイルを取得または作成する
+   * @param {string} targetFolderId 対象フォルダID
+   * @param {string} targetFileName 対象ファイル名
+   * @return {File} ファイルオブジェクト
+   */
   static getOrCreateFileUnderFolderById(targetFolderId, targetFileName){
     let file = null
     let targetFolder = null
@@ -487,11 +543,23 @@ class Gapps {
 
     return file;
   }
+  /**
+   * フォルダIDからフォルダを取得する
+   * @param {string} folderId フォルダID
+   * @return {Folder} フォルダオブジェクト
+   */
   static getFolderById(folderId){
     const folder = DriveApp.getFolderById(folderId);
     return folder
   }
 
+  /**
+   * 指定されたフォルダ情報に基づいてフォルダを取得または作成する
+   * @param {Object} yklibbFolderInfo フォルダ情報オブジェクト
+   * @param {string} targetFolderId 対象フォルダID
+   * @param {string} targetFolderName 対象フォルダ名
+   * @return {Folder} フォルダオブジェクト
+   */
   static getOrCreateFolderUnderSpecifiedFolder(yklibbFolderInfo, targetFolderId, targetFolderName){
     YKLiblog.Log.debug(`YKLibb Gapps getOrCreateFolderUnderSpecifiedFolder targetFolderId=${targetFolderId} targetFolderName=${targetFolderName}` )
     const parentFolderPath = yklibbFolderInfo.getParentFolderPath();
@@ -565,6 +633,13 @@ class Gapps {
     return folder;
   }
 
+  /**
+   * 指定フォルダ直下にファイルを出力する
+   * @param {Folder} folder 対象フォルダ
+   * @param {string} fileName ファイル名
+   * @param {string} rawcontent 出力内容
+   * @return {boolean} 成功したかどうか
+   */
   static outputFileUnderFolder(folder, fileName, rawcontent){
     const targetFolderId = folder.getId()
     YKLiblog.Log.debug(`outputFileUnderFolder targetFolderId=${targetFolderId}`)
@@ -588,6 +663,13 @@ class Gapps {
     return false
   }
 
+  /**
+   * 指定フォルダID直下にファイルを出力する
+   * @param {string} targetFolderId 対象フォルダID
+   * @param {string} fileName ファイル名
+   * @param {string} rawcontent 出力内容
+   * @return {boolean} 成功したかどうか
+   */
   static outputFileUnderFolderById(targetFolderId, fileName, rawcontent){
     YKLiblog.Log.debug(`outputFileUnderFolderById targetFolderId=${targetFolderId}`)
     const doc = Gapps.getOrCreateFileUnderFolderById(targetFolderId, fileName)
@@ -612,7 +694,6 @@ class Gapps {
 
   /**
    * Googleドライブ内の内容が空のGoogleドキュメントファイルのファイルIDを配列として取得する
-   *
    * @return {string[]} 内容が空のGoogleドキュメントファイルのファイルIDの配列
    */
   static getEmptyDocsFileIds() {
@@ -643,6 +724,10 @@ class Gapps {
     return emptyFileIds;
   }
 
+  /**
+   * ページネーションを使用してファイルを検索する
+   * @param {string} folderId 検索対象のフォルダID
+   */
   static searchFilesWithPagination(folderId) {
     // var folderId = 'YOUR_FOLDER_ID'; // 検索対象のフォルダID
     var query = 'folderId in "' + folderId + '" and mimeType = "application/vnd.google-apps.document"'; // 検索条件
@@ -686,6 +771,10 @@ class Gapps {
     }
   }
 
+  /**
+   * ルートフォルダの子フォルダIDを取得する
+   * @return {string[]} フォルダIDの配列
+   */
   static getRootFolderChildrenIds() {
     // ルートフォルダを取得
     const rootFolder = DriveApp.getRootFolder();
@@ -702,6 +791,11 @@ class Gapps {
     return folderIds;
   }
 
+  /**
+   * サブフォルダを取得する
+   * @param {FolderIterator} folders フォルダイテレータ
+   * @return {Array} フォルダ配列
+   */
   static getSubFolders(folders){
     if (!folders.hasNext()) {
         if (folders.hasNext()) {
@@ -711,6 +805,10 @@ class Gapps {
     }
   }
 
+  /**
+   * Computersフォルダ直下のフォルダIDを取得する（非再帰）
+   * @return {Array} フォルダIDの配列
+   */
   static getFolderIdsUnderComputersx() {
     // "Computers" のルートフォルダを取得
     let folderIdByName = { 
@@ -734,6 +832,10 @@ class Gapps {
     return folderIdArray
   }
 
+  /**
+   * Computersフォルダ直下のフォルダIDを取得する（再帰）
+   * @return {Array} フォルダIDの配列
+   */
   static getFolderIdsUnderComputers() {
     // "Computers" のルートフォルダを取得
     let folderIdByName = { 
