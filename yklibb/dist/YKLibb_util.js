@@ -1,5 +1,24 @@
 class Util {
   /**
+   * 文字列がURL形式であるかを判定します。
+   *
+   * @param {string} text - 検証したい文字列。
+   * @returns {boolean} - 文字列がURL形式の場合はtrue、そうでない場合はfalseを返します。
+   */
+  static isUrl(text) {
+    // textが文字列でない場合や空の場合は、falseを返す
+    if (typeof text !== 'string' || text.length === 0) {
+      return false;
+    }
+
+    // URLを判定するための正規表現（正規表現リテラル形式）
+    // / でパターンを囲み、最後にフラグ 'i' (大文字・小文字を区別しない) をつけています。
+    const urlPattern = /^(https?|ftp):\/\/((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[-a-z\d_]*)?$/i;
+
+    // test()メソッドで文字列が正規表現にマッチするかを判定
+    return urlPattern.test(text);
+  }
+  /**
    * 日付文字列またはDateオブジェクトから有効な日付情報を取得する
    * @param {string|Date} srcDateTime - ソースとなる日付文字列またはDateオブジェクト
    * @returns {Array} [date, dateTime, dateStr] - Dateオブジェクト、タイムスタンプ、フォーマット済み文字列の配列
@@ -137,7 +156,6 @@ class Util {
     YKLiblog.Log.debug(`invalidHeader=${invalidHeader}`)
     if(invalidHeader){
       YKLiblog.Log.debug(`Util.hasValidDataHeaderAndDataRows invalidHeader`)
-      YKLiblog.Log.debug(`Util.hasValidDataHeaderAndDataRows invalidHeader`)
       dataValues = values
     }
     else{
@@ -145,7 +163,6 @@ class Util {
     }
     invalidDataRows = Util.hasInvalidDataRows(dataValues, config)
     if(invalidDataRows){
-      YKLiblog.Log.debug(`Util.hasValidDataHeaderAndDataRows invalidDataRows`)
       YKLiblog.Log.debug(`Util.hasValidDataHeaderAndDataRows invalidDataRows`)
     }
 
@@ -242,12 +259,219 @@ class Util {
    * @returns {boolean} 無効なデータ行が含まれている場合はtrue、すべて有効な場合はfalse
    */
   static hasInvalidDataRows(values, config){
-    const invalid = values.some( item => {
-      const ret = item.length !== config.getWidth()
-      YKLiblog.Log.debug(`Util.hasInvalidDataRows item.length=${item.length} config.getWidth()=${config.getWidth()} ret=${ret}`)
+    if (values.length === 0){
+      return true
+    }
+    const invalid = values.some( array => {
+      const ret = array.some( item => {
+        YKLiblog.Log.debug(`hasInvalidDataRows item.constructor=${item.constructor}`)
+        // return item.trim().length === 0
+        return false
+      } )
+      YKLiblog.Log.debug(`Util.hasInvalidDataRows array.length=${array.length} config.getWidth()=${config.getWidth()} ret=${ret}`)
       return ret
     } )
     return invalid
+  }
+
+    /**
+   * 文字列内に存在する「\"」というシーケンスをすべて削除します。
+   *
+   * @param {string} str - 対象の文字列。
+   * @return {string} 「\"」が削除された新しい文字列。
+   */
+  static removeBackslashDoubleQuote(str) {
+    // replace()メソッドと正規表現（/\\"/g）を使用して、
+    // 文字列内の全ての「\"」を空文字（''）に置換します。
+    return str.replace(/\\"/g, '');
+  }
+
+  /**
+   * @description 今日の日付と時刻を日本のロケールで取得し、コンソールに出力します。
+   * @return {string} 今日の日付と時刻 (例: "2024/07/09 14:30:00")
+   */
+  static getTodaysDateTimeJa() {
+    const now = new Date();
+    const formattedDateTime = now.toLocaleString("ja-JP"); // 日本のロケールを指定
+    console.log(formattedDateTime); // 例: "2024/07/09 14:30:00"
+    return formattedDateTime;
+  }
+
+  /**
+   * @description 今日の日付と時刻をコンソールに表示します。
+   */
+  static displayTodaysDate() {
+    console.log(Util.getTodaysDateTimeJa());
+  }
+
+  /**
+   * @description 現在の日付と時刻を日本のロケールで取得します (24時間制)。
+   * @return {string} 現在の日付と時刻 (例: "2024/07/09 14:30:00")
+   */
+  static getCurrentDateTimeJa() {
+    const now = new Date();
+    const formattedDateTime = now.toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false, // 24時間制
+    });
+    return formattedDateTime;
+  }
+
+  /**
+   * @description 現在の日付と時刻をJSTで指定された形式で取得します。
+   * @param {string} fmt 形式 ("filename"の場合は"yyyyMMdd-HHmmss"、それ以外は"yyyy/MM/dd HH:mm:ss")
+   * @return {string} 現在の日付と時刻 (例: "2024/07/09 14:30:00" または "20240709-143000")
+   */
+  static getCurrentDateTimeJST(fmt="") {
+    const now = new Date();
+    let formattedDateTime = null;
+    if( fmt === "filename"){
+      formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyyMMdd-HHmmss");
+    }
+    else{
+      formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
+    }
+    return formattedDateTime;
+  }
+
+  static getDateTimeJST(now, fmt=""){
+    let formattedDateTime = null;
+    switch(fmt){
+      case "year":
+        formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyy");
+        break;
+      case "year_month":
+        formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyyMM");
+        break;
+      case "year_month_day":
+        formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyyMMdd");
+        break;
+      default: 
+        formattedDateTime = Utilities.formatDate(now, "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
+    }
+    return formattedDateTime;
+  }
+
+  /**
+   * @description 現在の日付と時刻をJSTでコンソールに表示します。
+   */
+  static displayCurrentDateTimeJST() {
+    console.log(Util.getCurrentDateTimeJST());
+  }
+
+  /**
+   * @description 現在の日付をJSTで指定された形式で取得します。
+   * @param {string} fmt 形式 ("filename"の場合は"yyyy-MM-dd"、それ以外は"yyyy/MM/dd")
+   * @return {string} 現在の日付 (例: "2024-07-09" または "20240709-143000")
+   */
+  static getCurrentDateJST(fmt="") {
+    const now = new Date();
+    let formattedDate = null;
+    if( fmt === "filename"){
+      formattedDate = Utilities.formatDate(now, "Asia/Tokyo", "yyyy-MM-dd");
+    }
+    else{
+      formattedDate = Utilities.formatDate(now, "Asia/Tokyo", "yyyy/MM/dd");
+    }
+    return formattedDate;
+  }
+
+  /**
+   * @description 現在の日付をJSTでコンソールに表示します。
+   */
+  static displayCurrentDate() {
+    console.log(Util.getCurrentDateJST());
+    console.log(Util.getCurrentDateJST("filename"));
+  }
+
+  static showExceptionInfo(e){
+    // Logger.log("エラーが発生しました:");
+    Logger.log("  メッセージ:", e.message);
+    Logger.log("  名前:", e.name);
+    Logger.log("  スタックトレース:", e.stack);
+  }
+
+  static createArrayOfObjects(twoDimArray, headers=null) {
+    // 配列が空か、ヘッダー行がない場合はエラーを返すか、空の配列を返します。
+    if (!twoDimArray || twoDimArray.length === 0) {
+      console.error("入力配列が空か無効です。");
+      return [];
+    }
+  
+    // 最初の行をヘッダーとして取得します。
+    if(headers === null){
+      headers = twoDimArray[0];
+      twoDimArray = twoDimArray.slice(1)
+    }
+  
+    // 結果となる連想配列の配列を格納する変数です。
+    const result = [];
+  
+    // 2行目からデータの処理を開始します。
+    // 各データ行をループ処理します。
+    for (let i = 0; i < twoDimArray.length; i++) {
+      const row = twoDimArray[i]; // 現在のデータ行
+      const obj = {}; // 現在の行に対応する新しいオブジェクト
+  
+      // ヘッダーとデータ行の各要素をペアにしてオブジェクトに格納します。
+      for (let j = 0; j < headers.length; j++) {
+        // ヘッダーのキーと対応するデータ行の値をペアにします。
+        // データ行の要素がヘッダーの数より少ない場合でもエラーにならないようにします。
+        obj[headers[j]] = row[j] !== undefined ? row[j] : null;
+      }
+      result.push(obj); // 作成したオブジェクトを結果配列に追加します。
+    }
+  
+    return result; // 連想配列の配列を返します。
+  }
+
+  static moveYouTubeSpreadsheets(name) {
+    // 移動先のフォルダIDを指定してください
+    const destinationFolderId = ENV.youtubeScribeFolderId; // ★ここに移動先のフォルダIDを入力
+
+    const destinationFolder = DriveApp.getFolderById(destinationFolderId);
+    const rootFolder = DriveApp.getRootFolder();
+    const files = rootFolder.getFiles();
+
+    while (files.hasNext()) {
+      const file = files.next();
+      if (file.getMimeType() === "application/vnd.google-apps.spreadsheet" && file.getName().endsWith(name)) {
+        file.moveTo(destinationFolder);
+        console.log(`Moved: ${file.getName()}`);
+      }
+    }
+  }
+
+  static moveYouTubeSpreadsheetsEndYoutube() {
+    Util.moveYouTubeSpreadsheets(" - YouTube")
+  }
+
+  static moveJsonFiles() {
+    // 移動先のフォルダIDを指定
+    const destinationFolderId = "YOUR_DESTINATION_FOLDER_ID";
+
+    // ルートディレクトリにあるファイルを取得
+    const rootFiles = DriveApp.getRootFolder().getFiles();
+
+    // 移動先のフォルダを取得
+    const destinationFolder = DriveApp.getFolderById(destinationFolderId);
+
+    // ファイルをループ処理
+    while (rootFiles.hasNext()) {
+      const file = rootFiles.next();
+
+      // ファイルがGoogleドキュメントで、ファイル名の末尾が「.json」の場合
+      if (file.getMimeType() === MimeType.GOOGLE_DOCS && file.getName().endsWith(".json")) {
+        // ファイルを移動
+        file.moveTo(destinationFolder);
+        Logger.log(`Moved file: ${file.getName()}`);
+      }
+    }
   }
 }
 this.Util=Util

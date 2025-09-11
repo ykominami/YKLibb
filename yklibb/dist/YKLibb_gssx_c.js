@@ -7,11 +7,12 @@ class Gssx {
    *
    * @param {string} spreadsheetId スプレッドシートのID
    * @param {string} sheetName シート名
-   * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+   * @return {Array<any>} [header, dataValues, totalRange] ヘッダー行、データ行、全範囲
    */
-  static setupSpeadsheet(spreadsheetId, sheetName){
+  static setupSpreadsheet(spreadsheetId, sheetName, ultimate=false){
     const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
-    return Gssx.setupSpreadsheetForHeaderAndValues(worksheet);
+    const [header, dataValues, totalRange] = Gssx.setupSpreadsheetForHeaderAndValues(worksheet, ultimate);
+    return [header, dataValues, totalRange]
   }
 
   /**
@@ -21,9 +22,12 @@ class Gssx {
    * @param {string} sheetName シート名
    * @return {Array<any>} [spreadsheet, worksheet, values, totalRange] スプレッドシート、ワークシート、値、データ範囲
    */
-  static setupSpeadsheetValues(spreadsheetId, sheetName){
+  static setupSpreadsheetValues(spreadsheetId, sheetName, ultimate = false){
     const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
-    const totalRange = Gssx.getMinimalContentRange(worksheet)
+    const totalRange = Gssx.getMinimalContentRange(worksheet, ultimate)
+    if( totalRange === null){
+      return [spreadsheet, worksheet, null, null]
+    }
     const values = totalRange.getValues()
     return [spreadsheet, worksheet, values, totalRange]
   }
@@ -35,14 +39,15 @@ class Gssx {
    * @param {string} sheetName シート名
    * @return {Array<any>} [worksheet, range] ワークシート、データ範囲
    */
-  static getDataSheetRange(spreadsheet, sheetName){
+  static getDataSheetRange(spreadsheet, sheetName, ultimate = false){
     YKLiblog.Log.debug(`Util.getDataSheetRange sheetName=${sheetName}`)
     let worksheet = spreadsheet.getSheetByName(sheetName);
     if(worksheet === null){
       worksheet = spreadsheet.insertSheet(sheetName)
       YKLiblog.Log.debug(`Util.getDataSheetRange insert sheetName=${sheetName}`)
     }
-    const range = Gssx.getMinimalContentRange(worksheet)
+    const range = Gssx.getMinimalContentRange(worksheet, ultimate)
+    // throw new Error('getDataSheetRange')
     return [worksheet, range]
   }
 
@@ -53,8 +58,12 @@ class Gssx {
    * @return {Range} ヘッダー行の範囲（1行目）
    */
   static getHeaderRange(range){
+    if( range === null){
+      return null
+    }
     const shape = YKLiba.Range.getRangeShape(range)
-    return range.offset(0,0, 1, shape.w)
+    const headerRange = range.offset(0,0, 1, shape.w)
+    return headerRange
   }
 
   /**
@@ -63,9 +72,13 @@ class Gssx {
    * @param {Range} range 対象の範囲
    * @return {Range} データ行の範囲（2行目以降）
    */
-  static geDataRowsRange(range){
+  static getDataRowsRange(range){
+    if( range === null ){
+      return null
+    }
     const shape = YKLiba.Range.getRangeShape(range)
-    return range.offset(1,0)
+    const dataRowsRange =  range.offset(1,0)
+    return dataRowsRange
   }
 
   /**
@@ -74,26 +87,32 @@ class Gssx {
    * @param {Sheet} worksheet 対象のワークシート
    * @return {Array<any>} [values, totalRange] 値の二次元配列、データ範囲
    */
-  static getValuesFromSheet(worksheet){
+  static getValuesFromSheet(worksheet, ultimate=false){
     // データ範囲を取得
-    const totalRange = Gssx.getMinimalContentRange(worksheet);
+    const totalRange = Gssx.getMinimalContentRange(worksheet, ultimate);
+    if(totalRange === null){
+      return [null, null]
+    }
     // データ範囲の値を取得 (二次元配列)
-    const values = totalRange.getValues();
+    const totalValues = totalRange.getValues();
 
-    return [values, totalRange];
+    return [totalValues, totalRange];
   }
 
   /**
    * ワークシートを指定して、ヘッダー行とデータ行を取得します。
    *
    * @param {Sheet} worksheet 対象のワークシート
-   * @return {Array<any>} [header, values, dataRange] ヘッダー行、データ行、データ範囲
+   * @return {Array<any>} [header, dataValues, totalRange] ヘッダー行、データ行、全範囲
    */
-  static setupSpreadsheetForHeaderAndValues(worksheet){
-    const [values, totalRange] = Gssx.getValuesFromSheet(worksheet); 
-    const header =  values.shift();
+  static setupSpreadsheetForHeaderAndValues(worksheet, ultimate=false){
+    const [totalValues, totalRange] = Gssx.getValuesFromSheet(worksheet, ultimate); 
+    // const header =  values.shift();
+    // const header =  totalValues.slice(0, 1);
+    const header =  totalValues[0];
+    const dataValues =  totalValues.slice(1);
 
-    return [header, values, totalRange];
+    return [header, dataValues, totalRange];
   }
 
   /**
@@ -103,26 +122,31 @@ class Gssx {
    * @param {Object} config 設定オブジェクト
    * @return {Array<any>} ヘッダーとデータの情報
    */
-  static setupSpreadsheetAndHeaderAndDataOfCol1(worksheet, config){
-    const totalRange = Gssx.getMinimalContentRange(worksheet);
+  static setupSpreadsheetAndHeaderAndDataOfCol1(worksheet, config, ultimate = false){
+    const totalRange = Gssx.getMinimalContentRange(worksheet, ultimate);
+    if( totalRange === null ){
+      return [null, null, null, null, null]
+    }
     const totalVallues = totalRange.getValues()
     // YKLiblog.Log.debug(`setupSpreadsheetAndHeaderAndDataOfCol1 totalVallues=${totalVallues}`)
     const col1Config = config.transform(0,1)
     const col1Range = totalRange.offset(0, 0, totalRange.getHeight(), 1)
     const col1Values = col1Range.getValues()
-    return Gssx.getHeaderAndData(col1Values, col1Range, col1Config)
+    const [header, values, headerRange, dataRowsRange, totalRange1] = Gssx.getHeaderAndData(col1Values, col1Range, col1Config)
+    return [header, values, headerRange, dataRowsRange, totalRange1]
   }
 
   /**
    * ワークシートと設定を指定して、ヘッダー行とデータ行を取得します。
    *
    * @param {Sheet} worksheet 対象のワークシート
-   * @param {Object} config 設定オブジェクト
+   * @param {Object} yklibbconfig 設定オブジェクト
    * @return {Array<any>} ヘッダーとデータの情報
    */
-  static setupSpreadsheetAndHeaderAndData(worksheet, config){
-    const [values, totalRange] = Gssx.getValuesFromSheet(worksheet);
-    return Gssx.getHeaderAndData(values, totalRange, config)
+  static setupSpreadsheetAndHeaderAndData(worksheet, yklibbconfig, ultimate=false){
+    const [totalValues0, totalRange0] = Gssx.getValuesFromSheet(worksheet, ultimate);
+    const [header, values, headerRange, dataRowsRange, totalRange] =  Gssx.getHeaderAndData(totalValues0, totalRange0, yklibbconfig, ultimate)
+    return [header, values, headerRange, dataRowsRange, totalRange]
   }
 
   /**
@@ -133,33 +157,44 @@ class Gssx {
    * @return {Array<any>} ヘッダーとデータの情報
    */
   static getHeaderAndDataFromWorksheet(worksheet, yklibbconfig){
-    const [values, totalRange] = Gssx.getValuesFromSheet(worksheet);
-    return Gssx.getHeaderAndData(values, totalRange, yklibbconfig)
+    const [totalValues0, totalRange0] = Gssx.getValuesFromSheet(worksheet);
+    const [header, values, headerRange, dataRowsRange, totalRange] =  Gssx.getHeaderAndData(totalValues0, totalRange0, yklibbconfig)
+    return [header, values, headerRange, dataRowsRange, totalRange]
   }
 
   /**
    * 値、データ範囲、設定を指定して、ヘッダーとデータの情報を取得します。
-   *
+   *-
    * @param {Array<Array<any>>} values 値の二次元配列
    * @param {Range} totalRange データ範囲
    * @param {Object} config 設定オブジェクト
    * @return {Array<any>} [header, values, headerRange, dataRowsRange, totalRange] ヘッダー、値、ヘッダー範囲、データ行範囲、全体範囲
    */
   static getHeaderAndData(values, totalRange, config){
+    let result, validHeader, validDataRows
+    let header = null
     let headerRange = null
     let dataRowsRange = null
-    let header = null
-
+    let totalValues 
+    if( totalRange === null){
+      return [header, totalValues, headerRange, dataRowsRange, totalRange];
+    }
     const totalRangeShape = YKLiba.Range.getRangeShape(totalRange)
     const t = totalRangeShape
     YKLiblog.Log.debug(`totalRangeShape t.r=${t.r} t.c=${t.c} t.h=${t.h} t.w=${t.w}`)
-    let validDataHADR = Util.hasValidDataHeaderAndDataRows(totalRange, config)
-    YKLiblog.Log.debug(`getHeaderAndData validDataHADR=${validDataHADR}`)
+    if( config.way == Config.NONE()){
+      result = true
+      validHeader = true
+      validDataRows = true
+    }
+    else{
+      [result, validHeader, validDataRows] = Util.hasValidDataHeaderAndDataRows(totalRange, config)
+    }
+    YKLiblog.Log.debug(`getHeaderAndData result=${result} validHeader=${validHeader} validDataRows=${validDataRows}`)
     // ValidHeader
-    if( validDataHADR[1] ){
-      header = values.slice(0,1)
-      // ValidDataRows
-      if( validDataHADR[2] ){
+    if( validHeader ){
+      header = values.slice(0,1)[0]
+      if( validDataRows ){
         headerRange = totalRange.offset(0, 0, 1, totalRangeShape.w)
         let h = totalRangeShape.h - 1
         if( h === 0 ){
@@ -179,7 +214,7 @@ class Gssx {
       // headerRange = totalRange.offset(0, 0, 1, config.getHeaderWidth())
       headerRange   = null
       // ValidDataRows
-      if( validDataHADR[2] ){
+      if( validDataRows ){
         dataRowsRange = totalRange
       }
       else{
@@ -187,8 +222,8 @@ class Gssx {
         dataRowsRange = null
       }
     }
-
-    return [header, values, headerRange, dataRowsRange, totalRange];
+    totalValues = values
+    return [header, totalValues, headerRange, dataRowsRange, totalRange];
   }
 
   /**
@@ -208,18 +243,12 @@ class Gssx {
     return [spreadsheet, worksheet]; 
   }
 
-  /**
-   * スプレッドシート中の空白でないセルをすべて含む最小の領域を取得します。
-   *
-   * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet 処理するシートオブジェクト。
-   * @returns {Range | null} 最小領域、またはデータが見つからない場合はnull。
-   */
-  static getMinimalContentRange(sheet) {
+  static getMinimalContentRange(sheet, ultimate=false) {
     if (!sheet) {
       YKLiblog.Log.debug("シートが指定されていません。");
-      return sheet.getRange(1, 1, 1, 1);
+      return null
     }
-
+    let range
     const lastRow = sheet.getLastRow();
     const lastColumn = sheet.getLastColumn();
 
@@ -239,15 +268,22 @@ class Gssx {
     // getDisplayValues() を使用すると、数式の結果なども取得できる
     const values = sheet.getRange(1, 1, lastRow, lastColumn).getDisplayValues();
 
+    let foundLine = -1
     // 各セルをループして空白でないセルを検索
-    for (let r = 0; r < lastRow; r++) {       // rは0ベースインデックス
-      for (let c = 0; c < lastColumn; c++) {  // cは0ベースインデックス
+    for (let r = 0; r < lastRow && foundLine < 0; r++) {       // rは0ベースインデックス
+      for (let c = 0; c < lastColumn && foundLine < 0; c++) {  // cは0ベースインデックス
         if (values[r][c] !== "") {
           // 空白でないセルが見つかった場合、最小/最大値を更新
           minRow = Math.min(minRow, r + 1); // 1ベースに変換して保存
           maxRow = Math.max(maxRow, r + 1);
           minCol = Math.min(minCol, c + 1); // 1ベースに変換して保存
           maxCol = Math.max(maxCol, c + 1);
+        }
+        else{
+          if( ultimate ){
+            YKLiblog.Log.debug(`getMinimalContentRange r=${r} c=${c}`)
+            foundLine = r
+          }
         }
       }
     }
@@ -260,7 +296,14 @@ class Gssx {
     }
 
     // 最小領域を作成
-    return sheet.getRange(minRow, minCol, maxRow - minRow + 1, maxCol - minCol + 1);
+    if( foundLine < 0){
+      range = sheet.getRange(minRow, minCol, maxRow - minRow + 1, maxCol - minCol + 1);
+    }
+    else{
+      range = sheet.getRange(minRow, minCol, foundLine, maxCol - minCol + 1);
+    }
+    const rangeShape = YKLiba.Range.getRangeShape(range)
+    return range
   }
 
   /**
@@ -313,6 +356,9 @@ class Gssx {
   static getValuesOfCol1FromSheet(worksheet){
     // データ範囲を取得
     const totalRange = Gssx.getMinimalContentRange(worksheet);
+    if( totalRange === null){
+      return [null, null, null];
+    }
     const height = totalRange.getHeight()
     const col1Range = totalRange.offset(0,0, height,1)
     // データ範囲の値を取得 (二次元配列)
@@ -503,9 +549,6 @@ class Gssx {
    * @param {Object} env 環境設定オブジェクト
    */
   static copyWorksheetContentX(env) {
-    let destinationSpreadsheet = null;
-    let destinationWorksheet = null;
-
     Gssx.copyWorksheetContent(env.destinationSpreadsheetId, env.infoSpreadsheetId, env.infoWorksheetName)
   }
 
@@ -531,7 +574,7 @@ class Gssx {
       if( !destinationWorksheetName ){
         destinationWorksheetName = "book";
       }
-      [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
+      const [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
    destinationWorksheetName);
       YKLiblog.Log.debug(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
       YKLiblog.Log.debug(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
@@ -563,9 +606,6 @@ class Gssx {
    * @param {Object} env 環境設定オブジェクト
    */
   static showWorksheetContentX(env) {
-    let destinationSpreadsheet = null;
-    let destinationWorksheet = null;
-
     Gssx.showWorksheetContent(env.destinationSpreadsheetId, env.infoSpreadsheetId, env.infoWorksheetName)
   }
 
@@ -590,7 +630,7 @@ class Gssx {
       if( !destinationWorksheetName ){
         destinationWorksheetName = "book";
       }
-      [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
+      const [destinationSpreadsheet, destinationWorksheet] = Gssx.setupForSpreadsheet(destinationSpreadsheetId,
    destinationWorksheetName);
       YKLiblog.Log.debug(`Z 1 A destinationSpreadsheet=${destinationSpreadsheet}`);
       YKLiblog.Log.debug(`Z 1 B destinationWorksheet=${destinationWorksheet}`);
@@ -680,8 +720,61 @@ class Gssx {
    * @return {string} JSON形式の文字列
    */
   static convertToJSON(data) {
-    return JSON.stringify(data, null, 2); // null, 2 はJSONを見やすく整形するための引数です
+    const jsonString = JSON.stringify(data, null, 2); // null, 2 はJSONを見やすく整形するための引数です
+    return jsonString
   }
 }
 
 this.Gssx = Gssx;
+
+function getSpreadsheetIdAndSheetName(){
+  const spreadsheetId = '1Mz4pqoclYFPSmbNlpf_g18CUNTcxt68KkKFVTNEJGg4' 
+  const sheetName = 'Mindstream'
+  return [spreadsheetId, sheetName]
+}
+function getSpreadsheetAndWorksheet(){
+  const [spreadsheetId, sheetName] = getSpreadsheetIdAndSheetName()
+
+  const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
+  return [spreadsheetId, sheetName, spreadsheet, worksheet]
+}
+function getConfigForTest(){
+  const header0 = ["id", "from", "subject", "dateStr", "plainBody"]
+  const yklibbConfig = new Config(header0.length, header0, Config.COMPLETE())
+  return yklibbConfig
+}
+function getConfigWIthNoneForTest(){
+  const header0 = ["id", "from", "subject", "dateStr", "plainBody"]
+  const yklibbConfig = new Config(header0.length, header0, Config.NONE())
+  return yklibbConfig
+}
+function test_gssx(){
+  const yklibbConfig = getConfigForTest()
+
+  const [spreadsheetId, sheetName, spreadsheet, worksheet] = getSpreadsheetAndWorksheet()
+
+  const [header, totalValues, totalRange] = Gssx.setupSpreadsheet(spreadsheetId, sheetName)
+
+  const [spreadsheet1, worksheet1, values1, totalRange1] = Gssx.setupSpreadsheetValues(spreadsheetId, sheetName)
+}
+function test_gssx_2(){
+  const yklibbConfig = getConfigForTest()
+
+  const [spreadsheetId, sheetName, spreadsheet, worksheet] = getSpreadsheetAndWorksheet()
+  let ultimate
+  ultimate = true
+  // ultimate = false
+  const [header, values, headerRange, dataRowsRange, totalRange] = Gssx.setupSpreadsheetAndHeaderAndData(worksheet, yklibbConfig, ultimate)
+}
+function test_gssx_3(){
+  const yklibbConfig = getConfigForTest()
+
+  const [spreadsheetId, sheetName, spreadsheet, worksheet] = getSpreadsheetAndWorksheet()
+  const sheetNames = Gssx.getAllWorksheetNames(spreadsheetId)
+  const exceptNames=  ["GAS-Gmail","_B","_A","Clasp-ts-etc","_config"]
+  const names = sheetNames.filter( name => !exceptNames.includes(name))
+  Logger.log(`sheetNames=${ JSON.stringify(names)}`)
+  Logger.log(`===`)
+
+  Logger.log(`exceptNames=${ JSON.stringify(exceptNames)}`)
+}

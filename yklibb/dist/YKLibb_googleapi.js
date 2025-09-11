@@ -1,16 +1,3 @@
-const XObj = {};
-
-/**
- * @description 指定された名前とURLを持つアイテムをXObjオブジェクトに追加します。
- * @param {string} name アイテムの名前
- * @param {string} url アイテムのURL
- */
-function addItem(name, url){
-  XObj[name] = {};
-  XObj[name]['url'] = url;
-  XObj[name]['name'] = name;
-}
-
 /**
  * @description リンクを含むHTMLレスポンスを返します。
  * @param {string} linkUrl リンク先のURL
@@ -30,19 +17,11 @@ function showUrl0(linkUrl){
  * @return {HtmlOutput} HTML出力
  */
 function showUrl(name, linkUrl){
-  addItem(name, linkUrl);
+  // addItem(name, linkUrl);
   return HtmlService.createHtmlOutput(
     `<html><head><base target="_top" /></head><body><a href="${linkUrl}">${name}</a></body></html>`
   );
   // return HtmlService.createTemplateFromFile("zhome.html").evaluate();
-}
-
-/**
- * @description XObjオブジェクトを返します。
- * @return {object} XObjオブジェクト
- */
-function getData() {
-  return XObj;
 }
 
 /**
@@ -96,10 +75,10 @@ function createGoogleAppsFileUnderFolderAndRet(kind="gss", rettype = "redirect",
   let url;
   switch(kind){
     case "gss":
-      url = createSpreadsheetUnderFolder(folderId, fileName);
+      url = getOrCreateSpreadsheetUnderFolder(folderId, fileName);
       break;
     case "docs":
-      url = createGoogleDocsUnderFolder(folderId, fileName);
+      url = getOrCreateGoogleDocsUnderFolder(folderId, fileName);
       break;
     default:
       url = "";
@@ -375,6 +354,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
   const path_array = folderInfo.parentFolderPath.split('>');
   let parentFolder = null;
   let folder = null
+  let folderx = null
 
   try{
     //folder = DriveApp.getFolderById(targetFolderId);
@@ -417,20 +397,15 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
     if( folders.length > 0 ){
       while( folders.hasNext() ){
         YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder A parentFolder=${parentFolder}`);
-        folder = folders.next()
-        if( folder.getName() === targetFolderName ){
-          yklibbFolderInfo.folderId = folder.getId()
-          yklibbFolderInfo.folderName = folder.getName()
+        folderx = folders.next()
+        if( folderx.getName() === targetFolderName ){
+          folder = folderx
           break
         }
       }
     }
-    else{
-      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder B parentFolder=${parentFolder}`);
-      folder = parentFolder.createFolder(targetFolderName);
-      yklibbFolderInfo.folderId = folder.getId()
-      yklibbFolderInfo.folderName = targetFolderName
-    }
+    YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder B parentFolder=${parentFolder}`);
+    folder = parentFolder.createFolder(targetFolderName);
   } catch(e) {
     YKLiblog.Log.fault(`YKLibb.getOrCreateFolderUnderDocsFolder 10 folder=${folder} e=${e}`);
   }
@@ -598,16 +573,16 @@ function getFolderIdsUnderComputers() {
 
     // "Computers" 直下のフォルダを再帰的に探索する関数
     function getFoldersRecursively(folder) {
-      var folders = folder.getFolders();
+      const folders = folder.getFolders();
       while (folders.hasNext()) {
-        var subFolder = folders.next();
+        const subFolder = folders.next();
         folderIds.push(subFolder.getId()); // フォルダIDを配列に追加
         getFoldersRecursively(subFolder);  // サブフォルダを再帰的に探索
       }
     }
 
     // const folder = DriveApp.getFolderById( folderIdByName[key] )
-    const folder = Gapps.getOrCreateFolderById( folderIdByName[key] );
+    const folder = Gapps.getFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       getFoldersRecursively(folders.next())

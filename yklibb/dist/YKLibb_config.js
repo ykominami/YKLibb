@@ -14,10 +14,11 @@ class Config {
     this.width = width
     this.header = header
     this.headerWidth = header.length
+    /*
     if( this.headerWidth === 0 ){
       throw new Error(`this.headerWidth=${this.headerWidth}`)
     }
-
+    */
     this.way = way
   }
   /**
@@ -75,6 +76,13 @@ class Config {
    */
   static COMPLETE(){
     return 'COMPLETE'
+  }
+  static NONE(){
+    return 'NONE'
+  }
+  static makeYKLibbConfig(header = [], way = Config.NONE()){
+    const yklibbConfig = new Config(header.length, header, way)
+    return yklibbConfig
   }
 }
 this.Config = Config
