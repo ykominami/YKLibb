@@ -13,8 +13,8 @@ function initx3(env){
 /**
  * シートの内容を取得し、ISBNを正規化してテーブルに保存する
  */
-function getSheetContent(){
-  let [header, values, dataRange] = initx3();
+function getSheetContent(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();
@@ -26,8 +26,8 @@ function getSheetContent(){
 /**
  * 状態を同期し、ISBNを正規化する（表示なし）
  */
-function syncState(){
-  let [header, values, dataRange] = initx3();
+function syncState(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();
@@ -38,8 +38,8 @@ function syncState(){
 /**
  * 状態を同期し、show2メソッドで表示する
  */
-function syncState2(){
-  let [header, values, dataRange] = initx3();
+function syncState2(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();
@@ -49,8 +49,8 @@ function syncState2(){
 /**
  * 状態を同期し、show3メソッドで表示する
  */
-function syncState3(){
-  let [header, values, dataRange] = initx3();
+function syncState3(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();
@@ -60,8 +60,8 @@ function syncState3(){
 /**
  * 状態を同期し、show4メソッドで表示する
  */
-function syncState4(){
-  let [header, values, dataRange] = initx3();
+function syncState4(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();
@@ -71,7 +71,7 @@ function syncState4(){
 /**
  * 状態を同期し、ISBNを正規化してテーブルに保存する（reformIsbn2使用）
  */
-function syncState5(){
+function syncState5(env){
   let [header, values, dataRange] = initx3();
 
   const table = new Table(header, values, dataRange);
@@ -84,8 +84,8 @@ function syncState5(){
 /**
  * 状態を同期し、show6メソッドで表示する
  */
-function syncState6(){
-  let [header, values, dataRange] = initx3();
+function syncState6(env){
+  let [header, values, dataRange] = initx3(env);
 
   const table = new Table(header, values, dataRange);
   // table.reformIsbn();

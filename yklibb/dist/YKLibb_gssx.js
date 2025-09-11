@@ -167,10 +167,11 @@ function getSourceWorksheets(spreadsheetId, worksheetName){
   // YKLiblog.Log.debug(`rows=${JSON.stringify(rows)}`);
   var sheetName;
   var rec = {};
-  for( var i = 0; i < rows.length; i++){
+  for( let i = 0; i < rows.length; i++){
     var row = rows[i];
     // YKLiblog.Log.debug(`row[1]=${JSON.stringify(row[1])}`);
-    switch(rows[i][1]){
+    const year = row[1];
+    switch(year){
       case 2014:
         sheetName = "2014-15";
         // YKLiblog.Log.debug(`sheetName=${JSON.stringify(sheetName)}`);
@@ -219,8 +220,9 @@ function getSourceWorksheets(spreadsheetId, worksheetName){
     }
     // YKLiblog.Log.debug(`sheetName=${JSON.stringify(sheetName)}`);
     if( sheetName !== ""){
-      [srcSpreadsheet, srcWorksheet] = setupForSpreadsheet(row[4], row[3]);
-      dataByYear = {"year": row[1], "sheetname": sheetName, id: row[4], "worksheet": srcWorksheet};
+      const spreadsheetId = row[4];
+      const [srcSpreadsheet, srcWorksheet] = setupForSpreadsheet(spreadsheetId, sheetName);
+      const dataByYear = {"year": row[1], "sheetname": sheetName, id: spreadsheetId, "worksheet": srcWorksheet};
       if( sheetName in rec ){
         rec[sheetName].push(dataByYear);
       }
@@ -288,11 +290,11 @@ function copyWorksheetContentX(env) {
  */
 function copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
 
-  var rec = getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
+  const rec = getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
   // YKLiblog.Log.debug(`rec=${JSON.stringify(rec)}`);
-  var keys = Object.keys(rec);
-  var [spreadsheet, worksheet] = setupForSpreadsheet(destinationSpreadsheetId);
-  var allSheetNames = getAllWorksheetNames(destinationSpreadsheetId);
+  const keys = Object.keys(rec);
+  const [spreadsheet, worksheet] = setupForSpreadsheet(destinationSpreadsheetId, sourceWorksheetName);
+  const allSheetNames = getAllWorksheetNames(destinationSpreadsheetId);
   for( var i = 0; i < allSheetNames.length; i++){
     var sheetName = allSheetNames[i];
     if( !keys.includes(sheetName)){

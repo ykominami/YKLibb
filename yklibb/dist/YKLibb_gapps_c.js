@@ -3,57 +3,34 @@
  * Google Drive、Google Docs、Google Sheetsの操作を提供する
  */
 class Gapps {
-
   /**
-   * 指定された名前とURLを持つアイテムをXObjオブジェクトに追加する
-   * @param {string} name アイテムの名前
-   * @param {string} url アイテムのURL
-   */
-  static addItem(name, url){
-    Gapps.XObj[name] = {};
-    Gapps.XObj[name]['url'] = url;
-    Gapps.XObj[name]['name'] = name;
-  }
-
-  /**
-   * リンクを含むHTMLレスポンスを返す
-   * @param {string} linkUrl リンク先のURL
-   * @return {HtmlOutput} HTMLレスポンス
-   */
-  static showUrl0(linkUrl){
-    // リンクを含むHTMLレスポンスを返す
-    return HtmlService.createHtmlOutput(
-      '<html><head><base target="_top" /></head><body><a href="${linkUrl}">Click here to visit the site</a></body></html>'
-    );
-  }
-
-  /**
-   * 指定された名前とURLを持つアイテムをXObjに追加し、HTML出力を返す
+   * 指定された名前とURLを持つHTML出力を返す
    * @param {string} name アイテムの名前
    * @param {string} linkUrl リンク先のURL
    * @return {HtmlOutput} HTML出力
    */
+  static showUrlAndHtmlService(name, linkUrl){
+    const str = Gapps.showUrl(name, linkUrl)
+    return HtmlService.createHtmlOutput( str )
+  }
+
+  /**
+   * 指定された名前とURLを持つHTML文を返す
+   * @param {string} name アイテムの名前
+   * @param {string} linkUrl リンク先のURL
+   * @return {string} HTML文
+   */
   static showUrl(name, linkUrl){
-    Gapps.addItem(name, linkUrl);
-    return HtmlService.createHtmlOutput(
-      `<html><head><base target="_top" /></head><body><a href="${linkUrl}">${name}</a></body></html>`
-    );
-    // return HtmlService.createTemplateFromFile("zhome.html").evaluate();
+    const str = `<html><head><base target="_top" /></head><body><a href="${linkUrl}">${name}</a></body></html>`
+    return str
   }
 
-  /**
-   * XObjオブジェクトを返す
-   * @return {object} XObjオブジェクト
-   */
-  static getData() {
-    return Gapps.XObj;
-  }
-
-  /**
-   * テスト用メソッド
-   */
-  static test_x(){
-    Gapps.getOrCreateGoogleAppsFileUnderFolderAndRet();
+  static getOrCreateGoogleAppsFileUnderFolderAndHtmlService(kind="gss", rettype = "redirect", folderId = null, fileName = "Untitled") {
+    let url = Gapps.getOrCreateGoogleAppsFileUnderFolderAsUrl(kind, rettype, folderId, fileName)
+    if( url === ""){
+        return HtmlService.createHtmlOutput("<b>エラー: " + `error unknown kind=${kind}` + "</b>");
+    }
+    return Gapps.getUrlAndHtmlService(url, fileName, rettype)
   }
 
   /**
@@ -64,7 +41,7 @@ class Gapps {
    * @param {string} fileName ファイル名
    * @return {HtmlOutput} HTML出力
    */
-  static getOrCreateGoogleAppsFileUnderFolderAndRet(kind="gss", rettype = "redirect", folderId = null, fileName = "Untitled") {
+  static getOrCreateGoogleAppsFileUnderFolderAsUrl(kind="gss", rettype = "redirect", folderId = null, fileName = "Untitled") {
     let url;
     switch(kind){
       case "gss":
@@ -75,14 +52,25 @@ class Gapps {
         break;
       default:
         url = "";
-        return HtmlService.createHtmlOutput("<b>エラー: " + `error unknown kind=${kind}` + "</b>");
     }
+    return url;
+  }
+
+  /**
+   * 指定された種類のGoogle Appsファイルを取得または作成し、指定された方法でレスポンスを返す
+   * @param {string} kind ファイルの種類 ("gss" または "docs")
+   * @param {string} rettype レスポンスの種類 ("redirect" または "showUrl")
+   * @param {string} folderId ファイルを作成するフォルダのID
+   * @param {string} fileName ファイル名
+   * @return {HtmlOutput} HTML出力
+   */
+  static getUrlAndHtmlService(url, fileName, rettype = "redirect") {
     switch(rettype){
       case "redirect":
-        return Gapps.redirectToUrl(url);
+        return Gapps.redirectToUrlAndHtmlService(url);
         break;
       case  "showUrl":
-        return Gapps.showUrl(fileName, url);
+        return Gapps.showUrlAndHtmlService(fileName, url);
       default:
         return HtmlService.createHtmlOutput("<b>エラー: " + `unknown rettype=${rettype}` + "</b>");
     }
@@ -100,10 +88,10 @@ class Gapps {
     let url;
     switch(kind){
       case "gss":
-        url = Gapps.createSpreadsheetUnderFolder(folderId, fileName);
+        url = Gapps.getUrlOfSpreadsheetUnderFolder(folderId, fileName);
         break;
       case "docs":
-        url = Gapps.createGoogleDocsUnderFolder(folderId, fileName);
+        url = Gapps.getUrlOfGoogleDocsUnderFolder(folderId, fileName);
         break;
       default:
         url = "";
@@ -111,10 +99,10 @@ class Gapps {
     }
     switch(rettype){
       case "redirect":
-        return Gapps.redirectToUrl(url);
+        return Gapps.redirectToUrlAndHtmlService(url);
         break;
       case  "showUrl":
-        return Gapps.showUrl(fileName, url);
+        return Gapps.showUrlAndHtmlService(fileName, url);
       default:
         return HtmlService.createHtmlOutput("<b>エラー: " + `unknown rettype=${rettype}` + "</b>");
     }
@@ -184,7 +172,7 @@ class Gapps {
    * @return {string} 新しく作成されたGoogle SpreadsheetへのURL
    * @customfunction
    */
-  static getUlrOfSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
+  static getUrlOfSpreadsheetUnderFolder(folderId = null, fileName = "Untitled") {
     const spreadsheet = Gapps.getOrCreateSpreadsheetUnderFolder(folderId, fileName)
 
     // スプレッドシートのURLを取得
@@ -219,10 +207,13 @@ class Gapps {
     // const urlHeadPart = PropertiesService.getScriptProperties().getProperty('URL_HEAD_PART');
     const urlHeadPart = ENV.urlHeadPart;
 
-    const document = getOrCreateGoogleDocsUnderFolder(folderId, fileName)
+    const document = Gapps.getOrCreateGoogleDocsUnderFolder(folderId, fileName)
+    Logger.log(`document.constructor=${ document.constructor }`)
+    Logger.log(`typeof(document)=${ typeof(document) }`)
 
     const id = document.getId();
     const file = DriveApp.getFileById(id);
+    const folder = Gapps.getFolderOrRootFolder(folderId)
     Gapps.moveFileFromRootFolderToFolder(folder, file);
     const url = urlHeadPart + id;
     return url;
@@ -274,18 +265,29 @@ class Gapps {
   }
 
   /**
-   * 指定されたディレクトリにGoogle Docsを作成し、そのDocsファイルにリダイレクトします
+   * 指定されたURLにリダイレクトする
    * @param {string} url リダイレクト先URL
-   * @return {HtmlOutput} 新しく作成されたGoogle Docsへのリダイレクト
+   * @return {HtmlOutput} 指定したURLへのリダイレクト
+   * @customfunction
+   */
+  static redirectToUrlAndHtmlService(url){
+    const html = this.redirectToUrl(url)
+    return HtmlService.createHtmlOutput(html)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  }
+
+  /**
+   * 指定されたURLにリダイレクトを行うHTML文を返す
+   * @param {string} url リダイレクト先URL
+   * @return {string} 指定されたURLへのリダイレクトを起こなうHTML文
    * @customfunction
    */
   static redirectToUrl(url){
-    // スプレッドシートのURLにリダイレクト
+    // 指定URLにリダイレクト
     let html = '<meta http-equiv="refresh" content="0; url=' + url + '" />';
     html += '<p>If you are not redirected, <a href="' + url + '">click here</a>.</p>'; // リダイレクトされない場合のリンク
     YKLiblog.Log.debug(`html=${html}`);
-    return HtmlService.createHtmlOutput(html)
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    return html
   }
 
   /**
@@ -341,6 +343,43 @@ class Gapps {
     return folder;
   }
 
+
+  /**
+   * @description パス配列に基づいてフォルダを取得または作成します。
+   * @param {string[]} pathArray フォルダパスの配列
+   * @return {Folder} 取得または作成されたフォルダ
+   */
+  static getFolderByPath(pathArray){
+    const rootFolder = DriveApp.getRootFolder();
+    let parentFolder = rootFolder;
+    let folder;
+    let folders;
+    for(let i=0; i<pathArray.length; i++){
+      YKLiblog.Log.debug(`getFolderByPath 1`)
+      folder = null
+      if( parentFolder === null){
+        YKLiblog.Log.debug(`getFolderByPath 2`)
+        break;
+      }
+      try{
+        folders = parentFolder.getFoldersByName(pathArray[i])
+        if( folders.hasNext() ){
+          folder = folders.next()
+          YKLiblog.Log.debug(`getFolderByPath 3`)
+        }
+        else {
+          YKLiblog.Log.debug(`getFolderByPath 4`)
+          folder = parentFolder.createFolder(pathArray[i])
+        }
+        parentFolder = folder
+      } catch(e) {
+        YKLiblog.Log.fault(`YKLibb 1 getFolderByPath e=${e}`)
+        parentFolder = null
+      }
+    }
+    YKLiblog.Log.debug(`getFolderByPath 6`)
+    return folder;
+  }
   /**
    * フォルダIDまたはパスからフォルダを取得または作成する
    * @param {string} folderId フォルダID
@@ -348,7 +387,7 @@ class Gapps {
    * @return {Folder} フォルダオブジェクト
    */
   static getOrCreateFolder(folderId, path){
-    let foder
+    let folder
     if( folderId ){
       YKLiblog.Log.debug(`folderId=${folderId}`)
       try{
@@ -360,7 +399,7 @@ class Gapps {
       }
     }
     if( !folderId ){
-      folder = YKLibb.Gapps.getOrCreateFolderByPathString(path)
+      folder = Gapps.getOrCreateFolderByPathString(path)
     }
     return folder
   }
@@ -500,7 +539,7 @@ class Gapps {
       YKLiblog.Log.fault(`7 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
       YKLiblog.Log.debug(`7 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
       YKLiblog.Log.debug(`7 e.name=${e.name}`)
-      YKLiblog.Log.debug(`7 e.message=${e.mssage}`)
+      YKLiblog.Log.debug(`7 e.message=${e.message}`)
       YKLiblog.Log.debug(`7 e.stack=${e.stack}`)
     }
     YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
@@ -535,7 +574,7 @@ class Gapps {
       YKLiblog.Log.fault(`8 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
       YKLiblog.Log.debug(`8 YKLibb.Gapps.getOrCreateFileUnderFolder 10 targetFolder=${targetFolder} e=${e}`);
       YKLiblog.Log.debug(`8 e.name=${e.name}`)
-      YKLiblog.Log.debug(`8 e.message=${e.mssage}`)
+      YKLiblog.Log.debug(`8 e.message=${e.message}`)
       YKLiblog.Log.debug(`8 e.stack=${e.stack}`)
     }
     YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFileUnderFolder 30 file=${file}`);
@@ -645,7 +684,7 @@ class Gapps {
     YKLiblog.Log.debug(`outputFileUnderFolder targetFolderId=${targetFolderId}`)
     const doc = Gapps.getOrCreateFileUnderFolderById(targetFolderId, fileName)
     if( doc === null ){
-      YKLiblog.Log.debug(`outputFileUnderFolder doc=null filenName=${fileName}`)
+      YKLiblog.Log.debug(`outputFileUnderFolder doc=null fileName=${fileName}`)
       return false
     }
     try{
@@ -674,7 +713,7 @@ class Gapps {
     YKLiblog.Log.debug(`outputFileUnderFolderById targetFolderId=${targetFolderId}`)
     const doc = Gapps.getOrCreateFileUnderFolderById(targetFolderId, fileName)
     if( doc === null ){
-      YKLiblog.Log.debug(`outputFileUnderFolder doc=null filenName=${fileName}`)
+      YKLiblog.Log.debug(`outputFileUnderFolder doc=null fileName=${fileName}`)
       return false
     }
     try{
