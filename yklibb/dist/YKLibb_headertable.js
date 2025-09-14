@@ -2,7 +2,7 @@
  * HeaderTableクラス - スプレッドシートのテーブルデータを管理するクラス
  * スプレッドシートの特定のシートをテーブルとして扱い、ヘッダーとデータの追加・更新機能を提供する
  */
-class HeaderTable{
+class HeaderTable extends BasicTable{
   /**
    * HeaderTableクラスのコンストラクタ
    * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} spreadsheet - 対象のスプレッドシート
@@ -10,70 +10,21 @@ class HeaderTable{
    * @param {Object} config - テーブル設定オブジェクト
    */
   constructor(spreadsheet, sheetName, config, yklibbConfig, ultimate = false){
-    this.ultimate = ultimate
-    if( typeof(ultimate) !== "boolean" ){
-      throw new Error(`${ typeof(ultimate) } ultimate is not boolean`)
-    }
-    this.config = config
-    this.spreadsheet = spreadsheet
-    this.spreadsheetUrl = spreadsheet.getUrl();
-    this.sheetName = sheetName
+    super(spreadsheet, sheetName, config, yklibbConfig, ultimate)
 
-    if( yklibbConfig !== null){
-      this.yklibbConfig = yklibbConfig
-      this.sourceHeader = yklibbConfig.getHeader()
-      // Assuming the first column is the ID column, or you can implement a method to get the ID column index
-      this.indexOfHeaderId = 0
+    // HeaderTable固有の初期化処理
+    if( this.dataRowsRange !== null ){
+      this.dataRowsValues = this.dataRowsRange.getValues()
+      this.nextDataRowsRange = this.dataRowsRange.offset(1,0, 1)
+      const rs = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
+      YKLiblog.Log.debug(`HeaderTable constructor 1 rs=${JSON.stringify(rs)}`)
     }
     else{
-      throw new Error("yklibbConfig is required when tableDef is not provided")
+      this.dataRowsValues = [[]]
+      this.nextDataRowsRange = this.headerRange.offset(1,0, 1)
+      const rs2 = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
+      YKLiblog.Log.debug(`HeaderTable constructor 2 rs=${JSON.stringify(rs2)}`)
     }
-
-    this.worksheet = null
-    this.header = null
-    this.totalValues = null
-    this.headerRange = null
-    this.dataRowsRange = null
-    this.nextDataRowsRange = null
-    this.totalRange = null
-    this.sheetId = null
-    this.sheetUrl = null
-
-    if (spreadsheet && config && yklibbConfig) {
-      // const [worksheet, values, totalRange] = config.getBInfo(spreadsheet)
-      // const totalRangeShape = YKLiba.Range.getRangeShape(totalRange)
-      // this.configTable = new ConfigTable(values, totalRange);
-      const spreadsheet = this.spreadsheet
-      const sheetName = this.sheetName
-      const config = this.config
-      const yklibbConfig = this.yklibbConfig 
-
-      const [worksheet, header, totalValues, headerRange, dataRowsRange, totalRange] = this.setup(spreadsheet, sheetName, config, yklibbConfig)
-      this.worksheet = worksheet
-      this.header = header
-      this.totalValues = totalValues
-      this.headerRange = headerRange
-      this.dataRowsRange = dataRowsRange
-      if( dataRowsRange !== null ){
-        this.dataRowsValues = dataRowsRange0.getValues()
-        this.nextDataRowsRange = this.dataRowsRange.offset(1,0, 1)
-        const rs = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
-        YKLiblog.Log.debug(`HeaderTable constructor 1 rs=${JSON.stringify(rs)}`)
-      }
-      else{
-        this.dataRowsValues = [[]]
-        this.nextDataRowsRange = this.headerRange.offset(1,0, 1)
-        const rs2 = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
-        YKLiblog.Log.debug(`HeaderTable constructor 2 rs=${JSON.stringify(rs2)}`)
-      }
-      this.totalRange = totalRange
-    }
-    const totalRange = this.totalRange
-    const headerRange = this.headerRange
-    const dataRowsRange = this.dataRowsRange
-    const nextDataRowsRange = this.nextDataRowsRange
-    const header = this.header
-    const totalValues = this.totalValues
   }
 
   /**
@@ -83,39 +34,6 @@ class HeaderTable{
    * @param {string} sheetName - シート名
    * @param {Object} yklibbConfig - YKLibb設定オブジェクト
    */
-  setup(spreadsheet, sheetName, yklibbConfig, ultimate=false){
-    YKLiblog.Log.debug(`RegisteredEmail constructor sheetName=${sheetName}`)
-
-    const worksheet = YKLibb.Gssx.getOrCreateWorksheet(spreadsheet,sheetName);
-    const sheetId = worksheet.getSheetId();
-    const sheetUrl = `${this.spreadsheetUrl}#gid=${sheetId}`;
-    this.sheetUrl = sheetUrl
-
-    const [header, totalValues, headerRange, dataRowsRange, totalRange] = this.getRangeForHeaderAndData(worksheet, yklibbConfig, ultimate)
-    return [worksheet, header, totalValues, headerRange, dataRowsRange, totalRange]
-  }
-
-  /**
-   * 行データから重複を除去した値と選択された行を取得する
-   * @param {Array} rows - 行データの配列
-   * @return {Array} [IDセット, 選択された行の配列]
-   */
-  distinctValues(rows){
-    YKLiblog.Log.debug(`this.indexOfHeaderId=${this.indexOfHeaderId}`)
-    const idSetInit = new Set()
-    const [idSet, selectedRows] = rows.reduce( (accumulator, currentValue) => {
-      const id = currentValue[this.indexOfHeaderId]
-      YKLiblog.Log.debug(`id=${id}`)
-      if( id !== null && typeof(id) !== "undefined" && id.trim().length > 0){
-        if( !accumulator[0].has(id) ){
-          accumulator[0].add(id)
-          accumulator[1].push(currentValue)
-        }
-      }
-      return accumulator
-    }, [idSetInit, []])
-    return [idSet, selectedRows]
-  }
 
   /**
    * テーブル構造を調整する
@@ -298,15 +216,6 @@ class HeaderTable{
     else{
       return [header0, totalValues0, headerRange0, dataRowsRange0, totalRange0]
     }
-  }
-  
-  /**
-   * 1列目から値を取得する
-   * @return {Array} 1列目の値の配列
-   */
-  getValuesFromCol1(){
-    const values =  this.getCol1(this.worksheet, this.yklibbConfig)
-    return values
   }
   
   getSpreadsheetId(){
