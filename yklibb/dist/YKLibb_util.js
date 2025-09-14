@@ -516,7 +516,7 @@ function test_has_t(sheetId, sheetName){
  * @returns {Array} [spreadsheet, worksheet, values, totalRange]
  */
 function test_has_info(sheetId, sheetName){
-  const [spreadsheet, worksheet, values, totalRange] = Gssx.setupSpeadsheetValues(sheetId, sheetName)
+  const [spreadsheet, worksheet, values, totalRange] = Gssx.setupSpreadsheetValues(sheetId, sheetName)
   YKLiblog.Log.debug(`values=${values}`)
   return [spreadsheet, worksheet, values, totalRange]
 }
