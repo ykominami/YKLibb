@@ -76,7 +76,6 @@ class Gssx {
     if( range === null ){
       return null
     }
-    const shape = YKLiba.Range.getRangeShape(range)
     const dataRowsRange =  range.offset(1,0)
     return dataRowsRange
   }
@@ -496,7 +495,7 @@ class Gssx {
       if( sheetName !== ""){
         let srcSpreadsheet, srcWorksheet;
         [srcSpreadsheet, srcWorksheet] = Gssx.setupForSpreadsheet(row[4], row[3]);
-        dataByYear = {"year": row[1], "sheetname": sheetName, id: row[4], "worksheet": srcWorksheet};
+        const dataByYear = {"year": row[1], "sheetname": sheetName, id: row[4], "worksheet": srcWorksheet};
         if( sheetName in rec ){
           rec[sheetName].push(dataByYear);
         }
@@ -563,12 +562,7 @@ class Gssx {
     YKLiblog.Log.debug(`ワークシートの内容`);
     let prevNumRows;
     const sourceWorksheets = Gssx.getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
-    // YKLiblog.Log.debug(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
-    for( var destinationWorksheetName in sourceWorksheets){
-      //if( ! (/^2022/.test(destinationWorksheetName) ) ){
-      //  YKLiblog.Log.debug(`continue destinationWorksheetName=${destinationWorksheetName}`)
-      //  continue;
-      //}
+    for( let destinationWorksheetName in sourceWorksheets){
       YKLiblog.Log.debug(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
       YKLiblog.Log.debug(`Z 1`);
       if( !destinationWorksheetName ){
@@ -619,12 +613,7 @@ class Gssx {
   static showWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sourceWorksheetName) {
     let prevNumRows;
     const sourceWorksheets = Gssx.getSourceWorksheets(sourceSpreadsheetId, sourceWorksheetName);
-    // YKLiblog.Log.debug(`sourceWorksheets=${JSON.stringify(sourceWorksheets)}`);
-    for( var destinationWorksheetName in sourceWorksheets){
-      //if( ! (/^2022/.test(destinationWorksheetName) ) ){
-      //  YKLiblog.Log.debug(`continue destinationWorksheetName=${destinationWorksheetName}`)
-      //  continue;
-      //}
+    for( let destinationWorksheetName in sourceWorksheets ){
       YKLiblog.Log.debug(`XXXXXXXXXXX destinationWorksheetName=${destinationWorksheetName}`)
       YKLiblog.Log.debug(`Z 1`);
       if( !destinationWorksheetName ){

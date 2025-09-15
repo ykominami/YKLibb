@@ -281,7 +281,12 @@ class BasicTable {
     const values =  this.getCol1(this.worksheet, this.yklibbConfig)
     return values
   }
+
+  getCol1(worksheet, yklibbConfig){
+    const values = Gssx.getValuesOfCol1FromSheet(worksheet)
+    return values
   }
+}
 
 /**
  * SimpleTableクラス - BasicTableを継承

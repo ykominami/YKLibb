@@ -1,6 +1,5 @@
 /**
- * @class Table
- * @description テーブルデータを管理するクラスです。
+ * テーブルデータを管理するクラス
  */
 class Table {
   /**
@@ -279,7 +278,12 @@ class Table {
       if( this.getCol(row, '状態') === '読了' ){
         const shape = this.getCol(row, '形態');
         const isbn = this.getCol(row, 'ISBN');
-        YKLiblog.Log.info(`shape=${shape} isbn=${isbn}`);
+        YKLiblog.Log.info/* The `getCol1` method in the `BasicTable` class is a method that retrieves
+        the values from the first column (column index 1) of the specified
+        worksheet based on the provided YKLibb configuration object. It is used to
+        extract the values from the first column of the data range in the
+        spreadsheet. */
+        (`shape=${shape} isbn=${isbn}`);
       }
     }
   }

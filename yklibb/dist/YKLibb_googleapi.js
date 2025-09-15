@@ -17,7 +17,6 @@ function showUrl0(linkUrl){
  * @return {HtmlOutput} HTML出力
  */
 function showUrl(name, linkUrl){
-  // addItem(name, linkUrl);
   return HtmlService.createHtmlOutput(
     `<html><head><base target="_top" /></head><body><a href="${linkUrl}">${name}</a></body></html>`
   );
@@ -189,11 +188,6 @@ function getOrCreateGoogleDocsUnderFolder(folderId = null, fileName = "Untitled"
     document = DocumentApp.create(fileName);
   }
 
-  // ドキュメントを作成します。
-  // Google DOcsの元のファイルを取得 (デフォルトではルートフォルダに作成される)
-  // var body = document.getBody();
-  // body.appendParagraph(getCurrentDateTimeJST());
-  // document.saveAndClose();
   const id = document.getId();
   const file = DriveApp.getFileById(id);
   moveFileFromRootFolderToFolder(folder, file);
@@ -261,7 +255,7 @@ function getFolderOrRootFolder(folderId) {
   } else {
     try {
       // folder = DriveApp.getFolderById(folderId);
-      folder = Gapps.getOrCreateFolderById(folderId);
+      folder = Gapps.getFolderById(folderId);
     } catch (e) {
       // IDが存在しないなどでgetできない場合、"0/0-LOG/inbox/etc"フォルダを利用
       YKLiblog.Log.debug(e.name)
@@ -320,7 +314,7 @@ function getFolderByPath(pathArray){
 function getOrCreateFileUnderFolder(targetFolderId, targetFileName){
   try{
     //const folder = DriveApp.getFolderById(targetFolderId);
-    const folder =Gapps.getOrCreateFolderById(targetFolderId);
+    const folder = Gapps.getFolderById(targetFolderId);
     const files = folder.getFiles();
     if( files.length > 0 ){
       while( files.hasNext() ){
@@ -358,7 +352,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
 
   try{
     //folder = DriveApp.getFolderById(targetFolderId);
-    folder = Gapps.getOrCreateFolderById(targetFolderId);
+    folder = Gapps.getFolderById(targetFolderId);
     YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　1 folder=${folder}`);
     return folder;
   } catch(e){
@@ -367,9 +361,9 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
   }
   if( parentFolder === null ){
     try{
-      YKLiblog.Log.debug.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
+      YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 parentFolder=${parentFolder}`);
       // parentFolder = DriveApp.getFolderById(folderInfo.parentFolderId);
-      parentFolder = Gapps.getOrCreateFolderById(folderInfo.parentFolderId);
+      parentFolder = Gapps.getFolderById(folderInfo.parentFolderId);
       YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　2 2 parentFolder=${parentFolder}`);
     } catch(e){
       YKLiblog.Log.fault(`YKLibb 3 getOrCreateFolderUnderDocsFolder`) 
@@ -379,7 +373,7 @@ function getOrCreateFolderUnderDocsFolder(folderInfo, targetFolderId, targetFold
   if( parentFolder === null ){
     try{
       YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　3 parentFolder=${parentFolder}`);
-      parentFolder = getFolderByPath(path_array);
+      parentFolder = Gapps.getFolderByPath(path_array);
       folderInfo.parentFolderId = parentFolder.getId();
       YKLiblog.Log.debug(`YKLibb.getOrCreateFolderUnderDocsFolder　3 2 parentFolder=${parentFolder}`);
     } catch(e){
@@ -543,7 +537,7 @@ function getFolderIdsUnderComputersx() {
   const folderIdArray = keys.map( key => {
     const folderIds = []
     // const folder = DriveApp.getFolderById( folderIdByName[key] )
-    const folder = Gapps.getOrCreateFolderById( folderIdByName[key] );
+    const folder = Gapps.getFolderById( folderIdByName[key] );
     const folders = folder.getFolders()
     while( folders.hasNext() ){
       const folder = folders.next()

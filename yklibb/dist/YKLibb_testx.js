@@ -8,8 +8,8 @@ function testIsUrl() {
   const validUrlWithQuery = "http://example.com/path?name=test";
   const noProtocolUrl = "www.google.com"; // このパターンではfalseになります
 
-  console.log(`"${validUrl}" はURLですか？ -> ${Util.isUrl(validUrl)}`); // 結果: true
-  console.log(`"${invalidUrl}" はURLですか？ -> ${Util.isUrl(invalidUrl)}`); // 結果: false
-  console.log(`"${validUrlWithQuery}" はURLですか？ -> ${Util.isUrl(validUrlWithQuery)}`); // 結果: true
-  console.log(`"${noProtocolUrl}" はURLですか？ -> ${Util.isUrl(noProtocolUrl)}`); // 結果: false
+  YKLiblog.Log.debug(`"${validUrl}" はURLですか？ -> ${Util.isUrl(validUrl)}`); // 結果: true
+  YKLiblog.Log.debug(`"${invalidUrl}" はURLですか？ -> ${Util.isUrl(invalidUrl)}`); // 結果: false
+  YKLiblog.Log.debug(`"${validUrlWithQuery}" はURLですか？ -> ${Util.isUrl(validUrlWithQuery)}`); // 結果: true
+  YKLiblog.Log.debug(`"${noProtocolUrl}" はURLですか？ -> ${Util.isUrl(noProtocolUrl)}`); // 結果: false
 }
