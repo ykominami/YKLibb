@@ -511,12 +511,6 @@ this.Util=Util
  * @param {string} sheetName - シート名
  * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
  */
-/**
- * スプレッドシートの設定とヘッダー・データを取得するテスト関数
- * @param {string} sheetId - スプレッドシートID
- * @param {string} sheetName - シート名
- * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
- */
 function test_has_re(sheetId, sheetName){
   const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(sheetId, sheetName)
   // const tableDef = this.getTargetedEmailIdsConfigTableDef()
@@ -528,12 +522,6 @@ function test_has_re(sheetId, sheetName){
   return [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
 }
 
-/**
- * スプレッドシートの設定とヘッダー・データを取得するテスト関数（COMPLETE設定）
- * @param {string} sheetId - スプレッドシートID
- * @param {string} sheetName - シート名
- * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
- */
 /**
  * スプレッドシートの設定とヘッダー・データを取得するテスト関数（COMPLETE設定）
  * @param {string} sheetId - スプレッドシートID
@@ -556,21 +544,12 @@ function test_has_t(sheetId, sheetName){
  * @param {string} sheetName - シート名
  * @returns {Array} [spreadsheet, worksheet, values, totalRange]
  */
-/**
- * スプレッドシートの値のみを取得するテスト関数
- * @param {string} sheetId - スプレッドシートID
- * @param {string} sheetName - シート名
- * @returns {Array} [spreadsheet, worksheet, values, totalRange]
- */
 function test_has_info(sheetId, sheetName){
   const [spreadsheet, worksheet, values, totalRange] = Gssx.setupSpreadsheetValues(sheetId, sheetName)
   YKLiblog.Log.debug(`values=${values}`)
   return [spreadsheet, worksheet, values, totalRange]
 }
 
-/**
- * ログデバッグを初期化してスプレッドシートの値を取得するテスト関数
- */
 /**
  * ログデバッグを初期化してスプレッドシートの値を取得するテスト関数
  */
@@ -582,9 +561,6 @@ function test_has_tc(){
   // YKLiblog.Log.debug(`values=${values}`)
 }
 
-/**
- * 複数のシートでテストを実行する関数
- */
 /**
  * 複数のシートでテストを実行する関数
  */
