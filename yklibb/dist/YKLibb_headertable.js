@@ -303,3 +303,5 @@ class HeaderTable extends BasicTable{
     this.nextDataRowsRange = this.nextDataRowsRange.offset(1,0,1)
   }
 }
+
+this.HeaderTable = HeaderTable

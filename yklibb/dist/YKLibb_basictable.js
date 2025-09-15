@@ -294,9 +294,4 @@ class BasicTable {
   }
 }
 
-/**
- * SimpleTableクラス - BasicTableを継承
- */
-class SimpleTable extends BasicTable{
-  // SimpleTable固有のメソッドはここに追加
-}
+this.BasicTable = BasicTable
