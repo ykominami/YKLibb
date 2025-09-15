@@ -398,6 +398,10 @@ class Util {
     YKLiblog.Log.debug(Util.getCurrentDateJST("filename"));
   }
 
+  /**
+   * 例外情報をログに出力する
+   * @param {Error} e - 例外オブジェクト
+   */
   static showExceptionInfo(e){
     // Logger.log("エラーが発生しました:");
     YKLiblog.Log.debug("  メッセージ:", e.message);
@@ -405,6 +409,12 @@ class Util {
     YKLiblog.Log.debug("  スタックトレース:", e.stack);
   }
 
+  /**
+   * 二次元配列から連想配列の配列を作成する
+   * @param {Array} twoDimArray - 二次元配列
+   * @param {Array|null} headers - ヘッダー配列（nullの場合は最初の行をヘッダーとして使用）
+   * @returns {Array} 連想配列の配列
+   */
   static createArrayOfObjects(twoDimArray, headers=null) {
     // 配列が空か、ヘッダー行がない場合はエラーを返すか、空の配列を返します。
     if (!twoDimArray || twoDimArray.length === 0) {
@@ -439,6 +449,10 @@ class Util {
     return result; // 連想配列の配列を返します。
   }
 
+  /**
+   * 指定された名前で終わるYouTubeスプレッドシートを移動する
+   * @param {string} name - ファイル名の末尾に含まれる文字列
+   */
   static moveYouTubeSpreadsheets(name) {
     // 移動先のフォルダIDを指定してください
     const destinationFolderId = ENV.youtubeScribeFolderId; // ★ここに移動先のフォルダIDを入力
@@ -456,10 +470,16 @@ class Util {
     }
   }
 
+  /**
+   * " - YouTube"で終わるYouTubeスプレッドシートを移動する
+   */
   static moveYouTubeSpreadsheetsEndYoutube() {
     Util.moveYouTubeSpreadsheets(" - YouTube")
   }
 
+  /**
+   * .jsonで終わるGoogleドキュメントファイルを移動する
+   */
   static moveJsonFiles() {
     // 移動先のフォルダIDを指定
     const destinationFolderId = "YOUR_DESTINATION_FOLDER_ID";

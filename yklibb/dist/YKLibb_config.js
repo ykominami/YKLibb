@@ -77,9 +77,20 @@ class Config {
   static COMPLETE(){
     return 'COMPLETE'
   }
+  /**
+   * 無処理方式を取得する
+   * @returns {string} 'NONE'文字列
+   */
   static NONE(){
     return 'NONE'
   }
+  
+  /**
+   * YKLibb設定オブジェクトを作成する
+   * @param {Array} header - ヘッダー配列
+   * @param {string} way - 処理方法
+   * @returns {Config} YKLibb設定オブジェクト
+   */
   static makeYKLibbConfig(header = [], way = Config.NONE()){
     const yklibbConfig = new Config(header.length, header, way)
     return yklibbConfig

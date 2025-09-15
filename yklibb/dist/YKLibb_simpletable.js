@@ -1,7 +1,7 @@
 
 /**
- * HeaderTableクラス - スプレッドシートのテーブルデータを管理するクラス
- * スプレッドシートの特定のシートをテーブルとして扱い、ヘッダーとデータの追加・更新機能を提供する
+ * SimpleTableクラス - スプレッドシートのテーブルデータを管理するクラス
+ * BasicTableを継承し、シンプルなテーブル操作機能を提供する
  */
 class SimpleTable extends BasicTable{
   /**
@@ -34,30 +34,60 @@ class SimpleTable extends BasicTable{
   }
 
 
+  /**
+   * 範囲、ヘッダー、総値の情報を取得する
+   * @returns {Array} [worksheet, totalRange, headerRange, dataRowsRange, nextDataRowsRange, header, totalValues, status]
+   */
   getRangesAndHeaderAndTotalValues(){
     return [this.worksheet, this.totalRange, this.headerRange, this.dataRowsRange, this.nextDataRowsRange, this.header, this.totalValues, this.status]
   }
 
+  /**
+   * ステータスを取得する
+   * @returns {number} ステータス値
+   */
   getStatus(){
     return this.status
   }
 
+  /**
+   * ワークシートを取得する
+   * @returns {GoogleAppsScript.Spreadsheet.Sheet} ワークシートオブジェクト
+   */
   getWorksheet(){
     return this.worksheet
   }
 
+  /**
+   * 全体範囲を取得する
+   * @returns {GoogleAppsScript.Spreadsheet.Range} 全体範囲オブジェクト
+   */
   getTotalRange(){
     return this.totalRange
   }
 
+  /**
+   * ヘッダーを取得する
+   * @returns {Array} ヘッダー配列
+   */
   getHeader(){
     return this.header
   }
 
+  /**
+   * データ行の値を取得する
+   * @returns {Array} データ行の値の配列
+   */
   getDataRowsValues(){
     return this.dataRowsRange.getValues()
   }
 
+  /**
+   * ヘッダーと連想配列からデータを追加する
+   * @param {Array} header - ヘッダー配列
+   * @param {Object} assoc - 連想配列
+   * @returns {GoogleAppsScript.Spreadsheet.Range} 次のデータ行範囲
+   */
   add(header, assoc){  
     // --- ⑤ データの書き込み ---
     const data = header.map( name => assoc[name])
@@ -70,6 +100,13 @@ class SimpleTable extends BasicTable{
     return this.nextDataRowsRange
   }
 
+  /**
+   * 配列オブジェクトから指定されたフィールドと値で検索する
+   * @param {Array} arrayOfObjects - 検索対象の配列オブジェクト
+   * @param {string} field - 検索フィールド名
+   * @param {any} value - 検索値
+   * @returns {Array} 検索結果の配列
+   */
   find(arrayOfObjects, field, value){
     return this.arrayOfObjects.filter( assoc => assoc[field] === value )
   }
@@ -121,26 +158,6 @@ class SimpleTable extends BasicTable{
     }
   }
   
-  /**
-   * ワークシートにヘッダーを追加する
-   * @param {Worksheet} sheet - 対象ワークシート
-   */
-
-  /**
-   * データ配列をスプレッドシートに登録する
-   * @param {Array} dataArray - 登録するデータの配列
-   * @param {string} op - 操作タイプ（REWRITE または addUnderRow）
-   */
-
-  /**
-   * データ行を調整する
-   * 重複チェック、行の削除・追加、ワークシートの更新を行う
-   */
-
-  /**
-   * ヘッダーを追加して更新する
-   * テーブル定義のヘッダー情報をスプレッドシートのヘッダー範囲に設定する
-   */
 
   /**
    * スプレッドシートIDとシート名からSimpleTableインスタンスを作成する
@@ -167,7 +184,7 @@ class SimpleTable extends BasicTable{
    * @param {string} way 処理方法
    * @returns {SimpleTable|null} SimpleTableインスタンスまたはnull
    */
-  static createById(ssId, sheetName, header = [], way = Config.NONE()){
+  static createByIdWithHeader(ssId, sheetName, header = [], way = Config.NONE()){
     let table = null
     const yklibbConfig = Config.makeYKLibbConfig(header, way)
     const spreadsheet = SpreadsheetApp.openById(ssId);
