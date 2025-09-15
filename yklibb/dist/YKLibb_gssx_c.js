@@ -716,27 +716,50 @@ class Gssx {
 
 this.Gssx = Gssx;
 
+/**
+ * テスト用のスプレッドシートIDとシート名を取得する
+ * @returns {Array} [spreadsheetId, sheetName] - スプレッドシートIDとシート名の配列
+ */
 function getSpreadsheetIdAndSheetName(){
   const spreadsheetId = '1Mz4pqoclYFPSmbNlpf_g18CUNTcxt68KkKFVTNEJGg4' 
   const sheetName = 'Mindstream'
   return [spreadsheetId, sheetName]
 }
+
+/**
+ * テスト用のスプレッドシートとワークシートを取得する
+ * @returns {Array} [spreadsheetId, sheetName, spreadsheet, worksheet] - スプレッドシート情報の配列
+ */
 function getSpreadsheetAndWorksheet(){
   const [spreadsheetId, sheetName] = getSpreadsheetIdAndSheetName()
 
   const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(spreadsheetId, sheetName);
   return [spreadsheetId, sheetName, spreadsheet, worksheet]
 }
+
+/**
+ * テスト用のConfig（COMPLETE）を取得する
+ * @returns {Config} YKLibb設定オブジェクト
+ */
 function getConfigForTest(){
   const header0 = ["id", "from", "subject", "dateStr", "plainBody"]
   const yklibbConfig = new Config(header0.length, header0, Config.COMPLETE())
   return yklibbConfig
 }
+
+/**
+ * テスト用のConfig（NONE）を取得する
+ * @returns {Config} YKLibb設定オブジェクト
+ */
 function getConfigWIthNoneForTest(){
   const header0 = ["id", "from", "subject", "dateStr", "plainBody"]
   const yklibbConfig = new Config(header0.length, header0, Config.NONE())
   return yklibbConfig
 }
+
+/**
+ * Gssxクラスのテスト関数
+ */
 function test_gssx(){
   const yklibbConfig = getConfigForTest()
 
@@ -746,6 +769,10 @@ function test_gssx(){
 
   const [spreadsheet1, worksheet1, values1, totalRange1] = Gssx.setupSpreadsheetValues(spreadsheetId, sheetName)
 }
+
+/**
+ * Gssxクラスのテスト関数2（ultimateフラグ付き）
+ */
 function test_gssx_2(){
   const yklibbConfig = getConfigForTest()
 
@@ -755,6 +782,10 @@ function test_gssx_2(){
   // ultimate = false
   const [header, values, headerRange, dataRowsRange, totalRange] = Gssx.setupSpreadsheetAndHeaderAndData(worksheet, yklibbConfig, ultimate)
 }
+
+/**
+ * Gssxクラスのテスト関数3（ワークシート名取得）
+ */
 function test_gssx_3(){
   const yklibbConfig = getConfigForTest()
 

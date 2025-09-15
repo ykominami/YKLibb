@@ -282,6 +282,12 @@ class BasicTable {
     return values
   }
 
+  /**
+   * ワークシートの1列目の値を取得する
+   * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet - 対象のワークシート
+   * @param {Object} yklibbConfig - YKLibb設定オブジェクト
+   * @return {Array} 1列目の値の配列
+   */
   getCol1(worksheet, yklibbConfig){
     const values = Gssx.getValuesOfCol1FromSheet(worksheet)
     return values

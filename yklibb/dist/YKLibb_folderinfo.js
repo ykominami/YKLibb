@@ -1,3 +1,7 @@
+/**
+ * フォルダ情報クラス
+ * Google Driveのフォルダ情報を管理する
+ */
 class FolderInfo {
   /**
    * FolderInfoクラスのコンストラクタ

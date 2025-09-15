@@ -177,6 +177,11 @@ class HeaderTable extends BasicTable{
       this.shrinkRows(selectedRows, length)
     }
   }
+  /**
+   * データ行を縮小する
+   * @param {Array} rows - 行データの配列
+   * @param {number} length - 長さ
+   */
   shrinkRows(rows, length){
     const range = this.dataRowsRange.offset(0, 0, length)
     // 書き換えが必要な場合は、行数が減るということだから、書換え前の行が残らないように、あらかじめクリアしておく
@@ -188,6 +193,13 @@ class HeaderTable extends BasicTable{
     this.dataRowsValues = rows
     this.nextDataRowsRange = this.dataRowsRange.offset(1,0,1)
   }
+  /**
+   * ヘッダーとデータの範囲を取得する
+   * @param {GoogleAppsScript.Spreadsheet.Sheet} worksheet - 対象のワークシート
+   * @param {Object} yklibbConfig - YKLibb設定オブジェクト
+   * @param {boolean} ultimate - 最終処理フラグ
+   * @return {Array} 範囲情報の配列
+   */
   getRangeForHeaderAndData(worksheet, yklibbConfig, ultimate=false){
     // yklibbConfigで指定したヘッダーが存在しない場合、返値のheaderはnull
     // 正しいヘッダが存在することが必須であるため、存在しなければ、worksheetの内容をクリアする
@@ -215,16 +227,32 @@ class HeaderTable extends BasicTable{
     }
   }
   
+  /**
+   * スプレッドシートIDを取得する
+   * @return {String} スプレッドシートID
+   */
   getSpreadsheetId(){
     return this.spreadsheet.getId()
   }
+  
+  /**
+   * シートURLを取得する
+   * @return {String} シートURL
+   */
   getSheetUrl(){
     return this.sheetUrl
   }
 
+  /**
+   * 全体範囲をクリアする
+   */
   clearTotalRange(){
     this.totalRange.clear()
   }
+  
+  /**
+   * クリアしてリセットする
+   */
   clearAndReset(){
     YKLiblog.Log.debug(`HeaderTable ${this.sheetName} clearAndReset`)
     this.worksheet.clear({formatOnly: true, contentsOnly: true})
