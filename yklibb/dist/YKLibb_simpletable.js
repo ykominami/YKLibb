@@ -142,6 +142,13 @@ class SimpleTable extends BasicTable{
    * テーブル定義のヘッダー情報をスプレッドシートのヘッダー範囲に設定する
    */
 
+  /**
+   * スプレッドシートIDとシート名からSimpleTableインスタンスを作成する
+   * @param {string} ssId スプレッドシートID
+   * @param {string} sheetName シート名
+   * @param {string} way 処理方法
+   * @returns {SimpleTable|null} SimpleTableインスタンスまたはnull
+   */
   static createById(ssId, sheetName, way = Config.NONE()){
     let table = null
     const yklibbConfig = Config.makeYKLibbConfig(way)
@@ -152,6 +159,14 @@ class SimpleTable extends BasicTable{
     return table
   }
   
+  /**
+   * スプレッドシートID、シート名、ヘッダーからSimpleTableインスタンスを作成する
+   * @param {string} ssId スプレッドシートID
+   * @param {string} sheetName シート名
+   * @param {Array} header ヘッダー配列
+   * @param {string} way 処理方法
+   * @returns {SimpleTable|null} SimpleTableインスタンスまたはnull
+   */
   static createById(ssId, sheetName, header = [], way = Config.NONE()){
     let table = null
     const yklibbConfig = Config.makeYKLibbConfig(header, way)

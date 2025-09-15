@@ -1,3 +1,6 @@
+/**
+ * ユーティリティクラス
+ */
 class Util {
   /**
    * 文字列がURL形式であるかを判定します。
@@ -339,6 +342,12 @@ class Util {
     return formattedDateTime;
   }
 
+  /**
+   * 指定された日時をJSTで指定された形式で取得する
+   * @param {Date} now 日時オブジェクト
+   * @param {string} fmt 形式
+   * @returns {string} フォーマット済みの日時文字列
+   */
   static getDateTimeJST(now, fmt=""){
     let formattedDateTime = null;
     switch(fmt){
@@ -385,21 +394,21 @@ class Util {
    * @description 現在の日付をJSTでコンソールに表示します。
    */
   static displayCurrentDate() {
-    console.log(Util.getCurrentDateJST());
-    console.log(Util.getCurrentDateJST("filename"));
+    YKLiblog.Log.debug(Util.getCurrentDateJST());
+    YKLiblog.Log.debug(Util.getCurrentDateJST("filename"));
   }
 
   static showExceptionInfo(e){
     // Logger.log("エラーが発生しました:");
-    Logger.log("  メッセージ:", e.message);
-    Logger.log("  名前:", e.name);
-    Logger.log("  スタックトレース:", e.stack);
+    YKLiblog.Log.debug("  メッセージ:", e.message);
+    YKLiblog.Log.debug("  名前:", e.name);
+    YKLiblog.Log.debug("  スタックトレース:", e.stack);
   }
 
   static createArrayOfObjects(twoDimArray, headers=null) {
     // 配列が空か、ヘッダー行がない場合はエラーを返すか、空の配列を返します。
     if (!twoDimArray || twoDimArray.length === 0) {
-      console.error("入力配列が空か無効です。");
+      YKLiblog.Log.error("入力配列が空か無効です。");
       return [];
     }
   
@@ -442,7 +451,7 @@ class Util {
       const file = files.next();
       if (file.getMimeType() === "application/vnd.google-apps.spreadsheet" && file.getName().endsWith(name)) {
         file.moveTo(destinationFolder);
-        console.log(`Moved: ${file.getName()}`);
+        YKLiblog.Log.debug(`Moved: ${file.getName()}`);
       }
     }
   }
@@ -469,13 +478,19 @@ class Util {
       if (file.getMimeType() === MimeType.GOOGLE_DOCS && file.getName().endsWith(".json")) {
         // ファイルを移動
         file.moveTo(destinationFolder);
-        Logger.log(`Moved file: ${file.getName()}`);
+        YKLiblog.Log.debug(`Moved file: ${file.getName()}`);
       }
     }
   }
 }
 this.Util=Util
 
+/**
+ * スプレッドシートの設定とヘッダー・データを取得するテスト関数
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
+ */
 /**
  * スプレッドシートの設定とヘッダー・データを取得するテスト関数
  * @param {string} sheetId - スプレッドシートID
@@ -499,6 +514,12 @@ function test_has_re(sheetId, sheetName){
  * @param {string} sheetName - シート名
  * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
  */
+/**
+ * スプレッドシートの設定とヘッダー・データを取得するテスト関数（COMPLETE設定）
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, header, values, headerRange, dataRowsRange, totalRange]
+ */
 function test_has_t(sheetId, sheetName){
   const [spreadsheet, worksheet] = Gssx.setupForSpreadsheet(sheetId, sheetName)
   const headerIdx = "id"
@@ -515,12 +536,21 @@ function test_has_t(sheetId, sheetName){
  * @param {string} sheetName - シート名
  * @returns {Array} [spreadsheet, worksheet, values, totalRange]
  */
+/**
+ * スプレッドシートの値のみを取得するテスト関数
+ * @param {string} sheetId - スプレッドシートID
+ * @param {string} sheetName - シート名
+ * @returns {Array} [spreadsheet, worksheet, values, totalRange]
+ */
 function test_has_info(sheetId, sheetName){
   const [spreadsheet, worksheet, values, totalRange] = Gssx.setupSpreadsheetValues(sheetId, sheetName)
   YKLiblog.Log.debug(`values=${values}`)
   return [spreadsheet, worksheet, values, totalRange]
 }
 
+/**
+ * ログデバッグを初期化してスプレッドシートの値を取得するテスト関数
+ */
 /**
  * ログデバッグを初期化してスプレッドシートの値を取得するテスト関数
  */
@@ -532,6 +562,9 @@ function test_has_tc(){
   // YKLiblog.Log.debug(`values=${values}`)
 }
 
+/**
+ * 複数のシートでテストを実行する関数
+ */
 /**
  * 複数のシートでテストを実行する関数
  */

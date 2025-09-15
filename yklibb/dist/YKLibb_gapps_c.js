@@ -373,7 +373,7 @@ class Gapps {
         }
         parentFolder = folder
       } catch(e) {
-        YKLiblog.Log.fault(`YKLibb 1 getFolderByPath e=${e}`)
+        YKLiblog.Log.fault(`YKLibb.Gapps 1 getFolderByPath e=${e}`)
         parentFolder = null
       }
     }
@@ -614,7 +614,7 @@ class Gapps {
       YKLiblog.Log.debug(`YKLibb.Gapps.getOrCreateFolderUnderSpecifiedFolder 1 folder=${folder}`);
       return folder;
     } catch(e){
-      YKLiblog.Log.debug(`9 YKLibb 2`)
+      YKLiblog.Log.debug(`9 YKLibb.Gaspps 2`)
       YKLiblog.Log.debug(`9 e.message=${e.message}`) 
         // do nothing
     }

@@ -126,7 +126,7 @@ class HeaderTable extends BasicTable{
     else{
       // YKLiba.Config.addUnderRow
       // 正しいヘッダーとデータが存在する場合は、既存のrangeの最後のROWの直下から追加する
-      const [validHeaderAndDataRows, validHeader, validDataRows ] = YKLibb.Util.hasValidDataHeaderAndDataRows(this.totalRange, this.yklibbConfig)
+      const [validHeaderAndDataRows, validHeader, validDataRows ] = Util.hasValidDataHeaderAndDataRows(this.totalRange, this.yklibbConfig)
       if( validHeaderAndDataRows ){
         // rangeShape2 = this.dataRowsRange
         range2 = this.dataRowsRange.offset(1,0)
@@ -197,13 +197,10 @@ class HeaderTable extends BasicTable{
     let dataRowsRange = null
     let dataRowsValues = [[]]
     let header, totalValues, headerRange, totalRange
-    const [header0, totalValues0, headerRange0, dataRowsRange0, totalRange0] = YKLibb.Gssx.setupSpreadsheetAndHeaderAndData(worksheet, yklibbConfig, ultimate)
+    const [header0, totalValues0, headerRange0, dataRowsRange0, totalRange0] = Gssx.setupSpreadsheetAndHeaderAndData(worksheet, yklibbConfig, ultimate)
     if(headerRange0 === null || dataRowsRange0 === null){
       worksheet.clear()
       this.addHeader(worksheet)
-      // addHeaderにより、以下が設定される
-      // this.header
-      // this.headerRange
       header = this.header
       headerRange = this.headerRange
 
@@ -252,7 +249,7 @@ class HeaderTable extends BasicTable{
    * @param {Array} oneRowValue - 追加するデータ行の値の配列
    */
   addDataRowsAndUpdate(oneRowValue){
-    YKLiblog.Log.debug(`Table addDataRowsAndUpdate (${this.sheetName}) values=${ JSON.stringify(values) }`)
+    YKLiblog.Log.debug(`HeaderTable addDataRowsAndUpdate (${this.sheetName}) values=${ JSON.stringify(values) }`)
     const dataRowsRangeShape = YKLiba.Range.getRangeShape(this.dataRowsRange) 
     YKLiblog.Log.debug(`HeaderTable (${this.sheetName}) dataRowsRangeShape=${ JSON.stringify(dataRowsRangeShape) }`)
     const nextDataRowsRangeShape = YKLiba.Range.getRangeShape(this.nextDataRowsRange) 
@@ -273,7 +270,7 @@ class HeaderTable extends BasicTable{
     this.totalRange = this.totalRange.offset(0,0, this.totalRange.getHeight() + 1 )
 
     const rangeShape2 = YKLiba.Range.getRangeShape(this.dataRowsRange)
-    YKLiblog.Log.debug(`Table (${this.sheetName}) addDataRowsAndUpdate rangeShape2=${ JSON.stringify(rangeShape2) }`)
+    YKLiblog.Log.debug(`HeaderTable (${this.sheetName}) addDataRowsAndUpdate rangeShape2=${ JSON.stringify(rangeShape2) }`)
 
     this.nextDataRowsRange = this.nextDataRowsRange.offset(1,0,1)
   }
