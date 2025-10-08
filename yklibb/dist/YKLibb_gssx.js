@@ -314,8 +314,8 @@ function copyWorksheetContent(destinationSpreadsheetId, sourceSpreadsheetId, sou
     var prevNumRows = 0;
     for( var j = 0; j < values.length; j++){
       var value = values[j];
-      var worksheet = value["worksheet"];
-      var [prevNumRows, numColumns] = copyOneWorksheetContent(j, [worksheet], sheet, prevNumRows);
+      var worksheetx = value["worksheet"];
+      var [prevNumRows, numColumns] = copyOneWorksheetContent(j, [worksheetx], sheet, prevNumRows);
     }
     // break;
   }
