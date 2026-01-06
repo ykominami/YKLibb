@@ -25,10 +25,16 @@ class SimpleTable extends BasicTable{
     }
     else{
       this.dataRowsValues = []
-      this.nextDataRowsRange = this.headerRange.offset(1, 0, 1)
-      const rs2 = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
-      YKLiblog.Log.debug(`SimpleTable constructor 2 rs=${JSON.stringify(rs2)}`)
-      this.status = 2
+      if(this.headerRange != null){
+        this.nextDataRowsRange = this.headerRange.offset(1, 0, 1)
+        const rs2 = YKLiba.Range.getRangeShape(this.nextDataRowsRange)
+        YKLiblog.Log.debug(`SimpleTable constructor 2 rs=${JSON.stringify(rs2)}`)
+        this.status = 2
+      }
+      else{
+        this.nextDataRowsRange = null
+        this.status = 3
+      }
     }
     this.arrayOfObjects = Util.createArrayOfObjects(this.dataRowsValues, this.header)
   }
