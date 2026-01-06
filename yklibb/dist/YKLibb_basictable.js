@@ -64,15 +64,13 @@ class BasicTable {
     this.sourceHeader = yklibbConfig.getHeader()
     this.indexOfHeaderId = 0
 
-    const [worksheet, totalRange, headerRange, dataRowsRange, nextDataRowsRange, header, totalValues, status] = Gssx.getHeaderAndDataFromWorksheet(spreadsheet.getSheetByName(sheetName), yklibbConfig)
-    this.worksheet = worksheet
+    const [header, values, headerRange, dataRowsRange, totalRange] = Gssx.getHeaderAndDataFromWorksheet(spreadsheet.getSheetByName(sheetName), yklibbConfig)
+
     this.totalRange = totalRange
     this.headerRange = headerRange
     this.dataRowsRange = dataRowsRange
-    this.nextDataRowsRange = nextDataRowsRange
     this.header = header
-    this.totalValues = totalValues
-    this.status = status
+    this.values = values
 
     if( dataRowsRange !== null ){
       this.sheetId = dataRowsRange.getSheet().getSheetId()
